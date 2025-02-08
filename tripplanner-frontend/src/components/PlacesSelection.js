@@ -1,4 +1,4 @@
-// src/PlacesSelection.js
+// src/components/PlacesSelection.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -6,7 +6,6 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
     const [daysData, setDaysData] = useState([]);
 
     useEffect(() => {
-        // Initialize daysData with empty selections for each day.
         const initialDays = [];
         for (let i = 1; i <= numberOfDays; i++) {
             initialDays.push({
@@ -14,6 +13,7 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
                 selectedPlaces: [],
                 startingPlaceId: null,
                 optimizedRoute: null,
+                isLoading: false,
                 placesByCategory: {
                     HOTEL: [],
                     RESTAURANT: [],
@@ -23,7 +23,6 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
         }
         setDaysData(initialDays);
 
-        // Fetch places for each category from the backend using the provided cityId.
         const categories = ['HOTEL', 'RESTAURANT', 'ATTRACTION'];
         categories.forEach((category) => {
             axios
@@ -42,11 +41,12 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
                         }))
                     );
                 })
-                .catch((error) => console.error(`Error fetching ${category} places:`, error));
+                .catch((error) =>
+                    console.error(`Error fetching ${category} places:`, error)
+                );
         });
     }, [cityId, numberOfDays, token]);
 
-    // Handle checkbox change for selecting/unselecting a place.
     const handleCheckboxChange = (dayNumber, placeId, checked) => {
         setDaysData((prevDays) =>
             prevDays.map((day) => {
@@ -61,19 +61,14 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
         );
     };
 
-    // Handle radio button change for selecting the starting point.
     const handleStartingPointChange = (dayNumber, placeId) => {
         setDaysData((prevDays) =>
-            prevDays.map((day) => {
-                if (day.dayNumber === dayNumber) {
-                    return { ...day, startingPlaceId: placeId };
-                }
-                return day;
-            })
+            prevDays.map((day) =>
+                day.dayNumber === dayNumber ? { ...day, startingPlaceId: placeId } : day
+            )
         );
     };
 
-    // This function sends the optimization request to the backend.
     const optimizeDay = (dayNumber) => {
         const day = daysData.find((d) => d.dayNumber === dayNumber);
         if (!day) return;
@@ -92,6 +87,12 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
             startingPlaceId: day.startingPlaceId.toString(),
         };
 
+        setDaysData((prevDays) =>
+            prevDays.map((d) =>
+                d.dayNumber === dayNumber ? { ...d, isLoading: true } : d
+            )
+        );
+
         axios
             .post(`http://localhost:8081/api/trip/${tripId}/day/${dayNumber}/optimize`, payload, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -99,12 +100,19 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
             .then((response) => {
                 const optimizedRoute = response.data.optimizedRoute;
                 setDaysData((prevDays) =>
-                    prevDays.map((d) => (d.dayNumber === dayNumber ? { ...d, optimizedRoute } : d))
+                    prevDays.map((d) =>
+                        d.dayNumber === dayNumber ? { ...d, optimizedRoute, isLoading: false } : d
+                    )
                 );
-                alert(`Day ${dayNumber} optimized successfully.`);
+                alert("Created successfully and saved the route successfully");
             })
             .catch((error) => {
                 console.error(`Error optimizing Day ${dayNumber}:`, error);
+                setDaysData((prevDays) =>
+                    prevDays.map((d) =>
+                        d.dayNumber === dayNumber ? { ...d, isLoading: false } : d
+                    )
+                );
                 alert(`Error optimizing route for Day ${dayNumber}.`);
             });
     };
@@ -139,7 +147,6 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
                     <div>
                         <h4>Select Starting Point</h4>
                         {day.selectedPlaces.map((placeId) => {
-                            // Find the corresponding place object from any category.
                             const allPlaces = [
                                 ...day.placesByCategory.HOTEL,
                                 ...day.placesByCategory.RESTAURANT,
@@ -164,6 +171,7 @@ const PlacesSelection = ({ token, tripId, cityId, numberOfDays }) => {
                     <button onClick={() => optimizeDay(day.dayNumber)}>
                         Optimize Route for Day {day.dayNumber}
                     </button>
+                    {day.isLoading && <div>Loading optimized route, please wait...</div>}
                     {day.optimizedRoute && (
                         <div>
                             <h4>Optimized Route:</h4>

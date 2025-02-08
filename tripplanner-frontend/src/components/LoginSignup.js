@@ -1,4 +1,4 @@
-// src/LoginSignup.js
+// src/components/LoginSignup.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +15,11 @@ const LoginSignup = ({ setToken }) => {
         axios.post(url, { username, password })
             .then(response => {
                 if (isLogin) {
-                    setToken(response.data.token);
-                    navigate('/trip');
+                    const token = response.data.token;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('username', username);
+                    setToken(token);
+                    navigate('/dashboard');
                 } else {
                     alert('Registration successful. Please login.');
                     setIsLogin(true);

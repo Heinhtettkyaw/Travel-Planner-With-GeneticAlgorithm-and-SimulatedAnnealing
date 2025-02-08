@@ -1,9 +1,11 @@
 // src/App.js
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import LoginSignup from './LoginSignup';
-import TripForm from './TripForm';
-import PlacesSelection from './PlacesSelection';
+import LoginSignup from './components/LoginSignup';
+import Dashboard from './components/Dashboard';
+import TripForm from './components/TripForm';
+import PlacesSelection from './components/PlacesSelection';
+import TripReview from './components/TripReview';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -15,14 +17,15 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginSignup setToken={setToken} />} />
+          <Route path="/dashboard" element={<Dashboard token={token} setToken={setToken} />} />
           <Route path="/trip" element={<TripForm token={token} />} />
           <Route path="/places" element={<PlacesWrapper token={token} />} />
+          <Route path="/review/:tripId" element={<TripReview token={token} />} />
         </Routes>
       </Router>
   );
 }
 
-// A wrapper to extract query parameters and pass them to PlacesSelection.
 const PlacesWrapper = ({ token }) => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);

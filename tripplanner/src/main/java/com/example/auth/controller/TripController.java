@@ -115,7 +115,6 @@ public class TripController {
                                            @PathVariable int dayNumber,
                                            @RequestBody Map<String, Object> dayData) {
         try {
-            // Retrieve the trip and the specific TripDay.
             Trip trip = tripRepository.findById(tripId)
                     .orElseThrow(() -> new RuntimeException("Trip not found"));
             Optional<TripDay> optionalTripDay = trip.getTripDays().stream()
@@ -126,7 +125,6 @@ public class TripController {
             }
             TripDay tripDay = optionalTripDay.get();
 
-            // Validate required payload fields.
             Object startingPlaceObj = dayData.get("startingPlaceId");
             if (startingPlaceObj == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Missing startingPlaceId in payload"));
@@ -140,10 +138,8 @@ public class TripController {
             Place startingPlace = placeRepository.findById(startingPlaceId)
                     .orElseThrow(() -> new RuntimeException("Starting place not found"));
             tripDay.setStartingPlace(startingPlace);
-            // Optionally store the raw selected places.
             tripDay.setSelectedPlaces(objectMapper.writeValueAsString(selectedPlacesObj));
 
-            // Convert selectedPlaces payload into a List of integers.
             List<Integer> selectedPlacesIds = new ArrayList<>();
             if (selectedPlacesObj instanceof List<?>) {
                 for (Object o : (List<?>) selectedPlacesObj) {
@@ -153,25 +149,20 @@ public class TripController {
                 return ResponseEntity.badRequest().body(Map.of("error", "selectedPlaces must be a list"));
             }
 
-            // Retrieve Place objects corresponding to the selected IDs.
             List<Place> places = placeRepository.findAllById(
                     selectedPlacesIds.stream().map(Long::valueOf).toList()
             );
 
-            // Run the genetic algorithm–based optimization.
             List<Place> optimizedRoute = routeOptimizationService.optimizeRoute(startingPlace, places);
 
-            // Build a friendly list of place names.
             List<String> optimizedRouteNames = new ArrayList<>();
             for (Place p : optimizedRoute) {
                 optimizedRouteNames.add(p.getName());
             }
 
-            // Save the optimized route (as a JSON string of names) in the TripDay record.
             tripDay.setOptimizedRoute(objectMapper.writeValueAsString(optimizedRouteNames));
             tripDayRepository.save(tripDay);
 
-            // Return the friendly optimized route.
             return ResponseEntity.ok(Map.of(
                     "message", "Route optimized successfully",
                     "optimizedRoute", optimizedRouteNames
@@ -180,6 +171,82 @@ public class TripController {
             ex.printStackTrace();
             return ResponseEntity.status(500)
                     .body(Map.of("error", "Route optimization failed", "message", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Retrieves the saved trip for review.
+     *
+     * Only the owner of the trip can review it.
+     * The response includes trip details (name, dates, city, created time) and,
+     * for each trip day, the day number, the starting place name (if set),
+     * and the optimized route (as a list of place names, if available).
+     */
+    @GetMapping("/review/{tripId}")
+    public ResponseEntity<?> reviewTrip(@PathVariable Long tripId, Authentication auth) {
+        try {
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new RuntimeException("Trip not found"));
+            User currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
+            if (!trip.getUser().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("tripId", trip.getId());
+            result.put("tripName", trip.getTripName());
+            result.put("numberOfDays", trip.getNumberOfDays());
+            result.put("startDate", trip.getStartDate());
+            result.put("endDate", trip.getEndDate());
+            result.put("cityName", trip.getCity().getName());
+            result.put("createdAt", trip.getCreatedAt());
+
+            List<Map<String, Object>> daysList = new ArrayList<>();
+            for (TripDay day : trip.getTripDays()) {
+                Map<String, Object> dayMap = new HashMap<>();
+                dayMap.put("dayNumber", day.getDayNumber());
+                dayMap.put("startingPlaceName", day.getStartingPlace() != null ? day.getStartingPlace().getName() : null);
+                if (day.getOptimizedRoute() != null) {
+                    List<String> optimizedRouteNames = objectMapper.readValue(day.getOptimizedRoute(), List.class);
+                    dayMap.put("optimizedRoute", optimizedRouteNames);
+                } else {
+                    dayMap.put("optimizedRoute", null);
+                }
+                daysList.add(dayMap);
+            }
+            result.put("tripDays", daysList);
+
+            return ResponseEntity.ok(result);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to review trip", "message", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Retrieves all trips for the logged-in user.
+     */
+    @GetMapping("/mytrips")
+    public ResponseEntity<?> getMyTrips(Authentication auth) {
+        try {
+            User currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
+            List<Trip> trips = tripRepository.findByUser(currentUser);
+            List<Map<String, Object>> tripList = new ArrayList<>();
+            for (Trip trip : trips) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("tripId", trip.getId());
+                map.put("tripName", trip.getTripName());
+                map.put("startDate", trip.getStartDate());
+                map.put("endDate", trip.getEndDate());
+                map.put("cityName", trip.getCity().getName());
+                tripList.add(map);
+            }
+            return ResponseEntity.ok(tripList);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to fetch trips", "message", ex.getMessage()));
         }
     }
 }
