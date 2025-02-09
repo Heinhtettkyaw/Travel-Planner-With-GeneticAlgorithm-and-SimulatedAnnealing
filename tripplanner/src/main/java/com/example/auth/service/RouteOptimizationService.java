@@ -13,12 +13,17 @@ public class RouteOptimizationService {
     @Autowired
     private TomTomService tomTomService;
 
-    /**
-     * Combines the starting place with the list of selected places, builds a distance matrix,
-     * runs the genetic algorithm, and returns the optimized route.
-     */
+    // Helper function to calculate route distance using the distance matrix.
+    private double calculateDistance(int[] route, double[][] distanceMatrix) {
+        double total = 0.0;
+        for (int i = 0; i < route.length - 1; i++) {
+            total += distanceMatrix[route[i]][route[i + 1]];
+        }
+        return total;
+    }
+
     public List<Place> optimizeRoute(Place startingPlace, List<Place> places) {
-        // Create a combined list with the starting place at index 0.
+        // Combine the starting place and the other places into one list.
         List<Place> allPlaces = new ArrayList<>();
         allPlaces.add(startingPlace);
         for (Place p : places) {
@@ -30,7 +35,7 @@ public class RouteOptimizationService {
         int n = allPlaces.size();
         double[][] distanceMatrix = new double[n][n];
 
-        // Build the distance matrix using distances from the TomTom API.
+        // Build the distance matrix using TomTomService.
         for (int i = 0; i < n; i++) {
             Place p1 = allPlaces.get(i);
             for (int j = 0; j < n; j++) {
@@ -43,20 +48,30 @@ public class RouteOptimizationService {
             }
         }
 
-        // Set GA parameters (adjust as needed).
-        int populationSize = 50;
-        int generations = 200;
-        double mutationRate = 0.1;
-
+        // --- Run Genetic Algorithm to generate an initial solution ---
+        int populationSize = 50;      // Tune as needed.
+        int generations = 1000;        // Tune as needed.
+        double mutationRate = 0.1;      // Tune as needed.
         GeneticAlgorithmTSP ga = new GeneticAlgorithmTSP(distanceMatrix, populationSize, generations, mutationRate);
-        int[] bestRouteIndices = ga.run();
+        int[] gaSolution = ga.run();
+        double gaDistance = calculateDistance(gaSolution, distanceMatrix);
 
-        // Map the optimized indices back to the corresponding Place objects.
+        // --- Run Simulated Annealing starting from the GA solution ---
+        double initialTemperature = 10000.0;  // Tune as needed.
+        double coolingRate = 0.995;           // Tune as needed.
+        int iterationsPerTemperature = 500;   // Tune as needed.
+        SimulatedAnnealingTSP sa = new SimulatedAnnealingTSP(distanceMatrix, initialTemperature, coolingRate, iterationsPerTemperature);
+        int[] saSolution = sa.run(gaSolution);
+        double saDistance = calculateDistance(saSolution, distanceMatrix);
+
+        // Choose the best solution (or simply use the SA-refined solution).
+        int[] bestSolution = (saDistance < gaDistance) ? saSolution : gaSolution;
+
+        // Map the best solution indices back to Place objects.
         List<Place> optimizedRoute = new ArrayList<>();
-        for (int index : bestRouteIndices) {
+        for (int index : bestSolution) {
             optimizedRoute.add(allPlaces.get(index));
         }
-
         return optimizedRoute;
     }
 }
