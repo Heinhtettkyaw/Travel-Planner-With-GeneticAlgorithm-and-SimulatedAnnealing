@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard';
 import TripForm from './components/TripForm';
 import PlacesSelection from './components/PlacesSelection';
 import TripReview from './components/TripReview';
+import PlacesSelectionWithMap from './components/PlacesSelectionWithMap';
+import TripFormWithMap from './components/TripFormWithMap';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -32,7 +34,7 @@ const PlacesWrapper = ({ token }) => {
   const tripId = query.get('tripId');
   const cityId = query.get('cityId');
   const numberOfDays = parseInt(query.get('numberOfDays'), 10);
-  return <PlacesSelection token={token} tripId={tripId} cityId={cityId} numberOfDays={numberOfDays} />;
+  return <PlacesSelectionWithMap token={token} tripId={tripId} cityId={cityId} numberOfDays={numberOfDays} />;
 };
 
 export default App;
