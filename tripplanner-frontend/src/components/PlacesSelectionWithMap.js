@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import MapDisplay from './MapDisplay';
+import MapDisplayMarkers from './MapDisplayMarkers';
+import MapDisplayOptimized from './MapDisplayOptimized';
 
-// Mapping of city IDs to coordinates ([longitude, latitude])—update these keys as needed.
+// Mapping of city IDs to coordinates ([longitude, latitude])
 const cityCoordinatesMapping = {
     "1": [-118.2437, 34.0522],  // Los Angeles
     "2": [-74.0060, 40.7128],    // New York
@@ -18,19 +19,20 @@ const PlacesSelectionWithMap = ({ token }) => {
     const cityId = query.get('cityId');
     const numberOfDays = parseInt(query.get('numberOfDays'), 10);
 
-    // daysData is an array—one element per day.
-    // Each day holds: dayNumber, selectedPlaces (array of place objects), startingPlaceId, optimizedRoute,
-    // and placesByCategory (object with keys HOTEL, RESTAURANT, ATTRACTION).
+    // daysData: one object per day containing selections and optimization info.
     const [daysData, setDaysData] = useState([]);
-
-    // availablePlaces holds the fetched places for each category.
+    // availablePlaces: fetched places per category from the backend.
     const [availablePlaces, setAvailablePlaces] = useState({
         HOTEL: [],
         RESTAURANT: [],
         ATTRACTION: []
     });
+    // optimizedRoute: will hold the ordered array of place objects (with lat/lon) for the current day.
+    const [optimizedRoute, setOptimizedRoute] = useState([]);
+    // Flag to indicate whether to show the optimized map (polyline) or markers.
+    const [showOptimizedMap, setShowOptimizedMap] = useState(false);
 
-    // Initialize daysData based on numberOfDays.
+    // Initialize daysData when numberOfDays changes.
     useEffect(() => {
         const initialDays = [];
         for (let i = 1; i <= numberOfDays; i++) {
@@ -38,7 +40,7 @@ const PlacesSelectionWithMap = ({ token }) => {
                 dayNumber: i,
                 selectedPlaces: [],
                 startingPlaceId: null,
-                optimizedRoute: null,
+                optimizedRoute: [],
                 isOptimizing: false,
                 placesByCategory: {
                     HOTEL: [],
@@ -50,7 +52,7 @@ const PlacesSelectionWithMap = ({ token }) => {
         setDaysData(initialDays);
     }, [numberOfDays]);
 
-    // Fetch available places for each category from the backend.
+    // Fetch available places for each category.
     useEffect(() => {
         const categories = ['HOTEL', 'RESTAURANT', 'ATTRACTION'];
         categories.forEach((category) => {
@@ -68,23 +70,17 @@ const PlacesSelectionWithMap = ({ token }) => {
         });
     }, [cityId, token]);
 
-    // Once availablePlaces are fetched, update each day's placesByCategory.
+    // Update each day's placesByCategory once availablePlaces are fetched.
     useEffect(() => {
-        if (
-            availablePlaces.HOTEL.length ||
-            availablePlaces.RESTAURANT.length ||
-            availablePlaces.ATTRACTION.length
-        ) {
-            setDaysData(prevDays =>
-                prevDays.map(day => ({
-                    ...day,
-                    placesByCategory: { ...availablePlaces }
-                }))
-            );
-        }
+        setDaysData(prevDays =>
+            prevDays.map(day => ({
+                ...day,
+                placesByCategory: { ...availablePlaces }
+            }))
+        );
     }, [availablePlaces]);
 
-    // Handle checkbox selection: update selectedPlaces for a given day.
+    // Handle checkbox selection for a given day.
     const handleCheckboxChange = (dayNumber, place, checked) => {
         setDaysData(prevDays =>
             prevDays.map(day => {
@@ -104,7 +100,7 @@ const PlacesSelectionWithMap = ({ token }) => {
         );
     };
 
-    // Handle radio selection for starting point.
+    // Handle radio button change for the starting point.
     const handleRadioChange = (dayNumber, placeId) => {
         setDaysData(prevDays =>
             prevDays.map(day =>
@@ -113,18 +109,15 @@ const PlacesSelectionWithMap = ({ token }) => {
         );
     };
 
-    // Handle Optimize Route button click for a given day.
+    // When Optimize Route is clicked for a day.
     const optimizeDay = (dayNumber) => {
         setDaysData(prevDays =>
             prevDays.map(day =>
                 day.dayNumber === dayNumber ? { ...day, isOptimizing: true } : day
             )
         );
-
-        // Find the corresponding day data.
         const day = daysData.find(d => d.dayNumber === dayNumber);
         if (!day) return;
-
         if (!day.selectedPlaces || day.selectedPlaces.length === 0) {
             alert(`Please select at least one place for Day ${dayNumber}`);
             setDaysData(prevDays =>
@@ -144,7 +137,7 @@ const PlacesSelectionWithMap = ({ token }) => {
             return;
         }
 
-        // Prepare payload: send an array of selected place IDs and the startingPlaceId.
+        // Prepare payload with selected place IDs and startingPlaceId.
         const payload = {
             selectedPlaces: day.selectedPlaces.map(p => p.id),
             startingPlaceId: day.startingPlaceId.toString()
@@ -155,15 +148,29 @@ const PlacesSelectionWithMap = ({ token }) => {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {
-                // The response should contain the optimized route as a list of place names.
-                const optimizedRoute = response.data.optimizedRoute;
+                // The backend returns an optimized route as an array of place names.
+                const optimizedNames = response.data.optimizedRoute;
+                // Now, combine available places from all categories into one array.
+                const combinedAvailablePlaces = [
+                    ...availablePlaces.HOTEL,
+                    ...availablePlaces.RESTAURANT,
+                    ...availablePlaces.ATTRACTION,
+                ];
+                // Map each optimized name to the corresponding place object.
+                const mappedOptimizedRoute = optimizedNames.map(name => {
+                    return combinedAvailablePlaces.find(p => p.name === name);
+                }).filter(item => item); // Filter out any not found.
+
+                // Update the day's optimizedRoute and overall optimizedRoute state.
                 setDaysData(prevDays =>
                     prevDays.map(d =>
                         d.dayNumber === dayNumber
-                            ? { ...d, optimizedRoute, isOptimizing: false }
+                            ? { ...d, optimizedRoute: mappedOptimizedRoute, isOptimizing: false }
                             : d
                     )
                 );
+                setOptimizedRoute(mappedOptimizedRoute);
+                setShowOptimizedMap(true);
                 alert(`Day ${dayNumber}: Optimized route created and saved successfully.`);
             })
             .catch((error) => {
@@ -177,12 +184,12 @@ const PlacesSelectionWithMap = ({ token }) => {
             });
     };
 
-    // Combine selected places from all days for markers on the map.
+    // Combine selected places from all days for markers.
     const combinedSelectedPlaces = daysData.reduce((acc, day) => acc.concat(day.selectedPlaces), []);
 
     return (
-        <div style={{ display: 'flex' }}>
-            {/* Left side: Multi-day Place Selection Form */}
+        <div style={{ display: 'flex', height: '600px' }}>
+            {/* Left Column: Multi-day Place Selection Form */}
             <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
                 <h2>Select Places for Your Trip (Days: {numberOfDays})</h2>
                 {daysData.map(day => (
@@ -221,13 +228,17 @@ const PlacesSelectionWithMap = ({ token }) => {
                         <button onClick={() => optimizeDay(day.dayNumber)} disabled={day.isOptimizing}>
                             {day.isOptimizing ? 'Optimizing...' : 'Optimize Route'}
                         </button>
-                        {day.optimizedRoute && (
+                        {day.optimizedRoute && day.optimizedRoute.length > 0 && (
                             <div>
-                                <h4>Optimized Route:</h4>
+                                <h4>Optimized Route (Text):</h4>
                                 <ul>
-                                    {day.optimizedRoute.map((placeName, idx) => (
-                                        <li key={idx}>{placeName}</li>
+                                    {day.optimizedRoute.map((placeObj, idx) => (
+                                        <li key={idx}>{placeObj.name}</li>
                                     ))}
+                                    {/*{day.optimizedRoute.map((placeName, idx) => (*/}
+                                    {/*    <li key={idx}>{placeName}</li>*/}
+                                    {/*))}*/}
+
                                 </ul>
                             </div>
                         )}
@@ -235,9 +246,19 @@ const PlacesSelectionWithMap = ({ token }) => {
                 ))}
             </div>
 
-            {/* Right side: Map Display */}
+            {/* Right Column: Map Display */}
             <div style={{ flex: 1, padding: '10px' }}>
-                <MapDisplay cityCoordinates={cityCoordinatesMapping[cityId] || [-87.6298, 41.8781]} markers={combinedSelectedPlaces} />
+                {showOptimizedMap ? (
+                    <MapDisplayOptimized
+                        cityCoordinates={cityCoordinatesMapping[cityId] || [-87.6298, 41.8781]}
+                        route={optimizedRoute}
+                    />
+                ) : (
+                    <MapDisplayMarkers
+                        cityCoordinates={cityCoordinatesMapping[cityId] || [-87.6298, 41.8781]}
+                        markers={combinedSelectedPlaces}
+                    />
+                )}
             </div>
         </div>
     );
