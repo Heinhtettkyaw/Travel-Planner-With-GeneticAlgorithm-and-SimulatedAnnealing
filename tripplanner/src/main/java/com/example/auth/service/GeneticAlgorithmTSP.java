@@ -33,6 +33,8 @@ public class GeneticAlgorithmTSP {
         for (int i = 0; i < route.length - 1; i++) {
             totalDistance += distanceMatrix[route[i]][route[i + 1]];
         }
+        // Add the distance from the last point back to the starting point (A)
+        totalDistance += distanceMatrix[route[route.length - 1]][route[0]];
         return totalDistance;
     }
 

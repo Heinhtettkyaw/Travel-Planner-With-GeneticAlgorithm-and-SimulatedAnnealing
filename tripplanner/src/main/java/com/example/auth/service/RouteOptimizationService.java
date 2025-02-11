@@ -72,6 +72,12 @@ public class RouteOptimizationService {
         for (int index : bestSolution) {
             optimizedRoute.add(allPlaces.get(index));
         }
+
+        // Ensure the route forms a round-trip by adding the starting place at the end if needed.
+        if (!optimizedRoute.get(optimizedRoute.size() - 1).equals(startingPlace)) {
+            optimizedRoute.add(startingPlace);  // Add the starting place at the end to make it a round trip.
+        }
+
         return optimizedRoute;
     }
 }

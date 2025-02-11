@@ -17,12 +17,14 @@ public class SimulatedAnnealingTSP {
         this.random = new Random();
     }
 
-    // Helper method to calculate the total distance for a route.
+    // Helper method to calculate the total distance for a route (including the return to the starting point).
     public double routeDistance(int[] route) {
         double total = 0.0;
         for (int i = 0; i < route.length - 1; i++) {
             total += distanceMatrix[route[i]][route[i + 1]];
         }
+        // Add the distance from the last city back to the starting point (A)
+        total += distanceMatrix[route[route.length - 1]][route[0]];
         return total;
     }
 
