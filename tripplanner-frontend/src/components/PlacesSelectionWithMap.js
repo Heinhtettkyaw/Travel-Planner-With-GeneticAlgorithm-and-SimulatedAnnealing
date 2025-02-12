@@ -25,7 +25,7 @@ const PlacesSelectionWithMap = ({ token }) => {
     const [optimizedRoute, setOptimizedRoute] = useState([]);
     const [showOptimizedMap, setShowOptimizedMap] = useState(false);
 
-    // Ensure dayNumber is within valid range
+    // Ensure dayNumber is within valid range and update URL if not present
     useEffect(() => {
         if (dayNumber < 1) dayNumber = 1;
         if (dayNumber > numberOfDays) dayNumber = numberOfDays;
@@ -36,7 +36,7 @@ const PlacesSelectionWithMap = ({ token }) => {
         }
     }, [dayNumber, dayNumberParam, navigate, numberOfDays, tripId, cityId]);
 
-    // Initialize daysData
+    // Initialize daysData with default values
     useEffect(() => {
         const initialDays = Array.from({ length: numberOfDays }, (_, i) => ({
             dayNumber: i + 1,
@@ -49,7 +49,7 @@ const PlacesSelectionWithMap = ({ token }) => {
         setDaysData(initialDays);
     }, [numberOfDays]);
 
-    // Fetch available places
+    // Fetch available places for each category
     useEffect(() => {
         const categories = ['HOTEL', 'RESTAURANT', 'ATTRACTION'];
         categories.forEach((category) => {
@@ -105,7 +105,6 @@ const PlacesSelectionWithMap = ({ token }) => {
     const optimizeDay = () => {
         const day = daysData.find(d => d.dayNumber === dayNumber);
         if (!day) return;
-
         setDaysData(prevDays =>
             prevDays.map(d =>
                 d.dayNumber === dayNumber ? { ...d, isOptimizing: true } : d
@@ -113,65 +112,81 @@ const PlacesSelectionWithMap = ({ token }) => {
         );
 
         if (day.selectedPlaces.length === 0) {
-            alert('Please select at least one place.');
-            setDaysData(prevDays => prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d));
+            alert(`Please select at least one place for Day ${dayNumber}`);
+            setDaysData(prevDays =>
+                prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d)
+            );
             return;
         }
-
         if (!day.startingPlaceId) {
-            alert('Please select a starting point.');
-            setDaysData(prevDays => prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d));
+            alert(`Please select a starting point for Day ${dayNumber}`);
+            setDaysData(prevDays =>
+                prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d)
+            );
             return;
         }
 
-        axios.post(`http://localhost:8081/api/trip/${tripId}/day/${dayNumber}/optimize`, {
+        const payload = {
             selectedPlaces: day.selectedPlaces.map(p => p.id),
             startingPlaceId: day.startingPlaceId.toString()
-        }, { headers: { Authorization: `Bearer ${token}` } })
-            .then(response => {
-                const combinedPlaces = [...availablePlaces.HOTEL, ...availablePlaces.RESTAURANT, ...availablePlaces.ATTRACTION];
-                const optimized = response.data.optimizedRoute.map(name =>
-                    combinedPlaces.find(p => p.name === name)
-                ).filter(Boolean);
+        };
+
+        axios.post(`http://localhost:8081/api/trip/${tripId}/day/${dayNumber}/optimize`, payload, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then((response) => {
+                const optimizedNames = response.data.optimizedRoute;
+                const combinedAvailablePlaces = [
+                    ...availablePlaces.HOTEL,
+                    ...availablePlaces.RESTAURANT,
+                    ...availablePlaces.ATTRACTION,
+                ];
+                const mappedOptimizedRoute = optimizedNames.map(name => {
+                    return combinedAvailablePlaces.find(p => p.name === name);
+                }).filter(item => item);
 
                 setDaysData(prevDays =>
                     prevDays.map(d =>
-                        d.dayNumber === dayNumber
-                            ? { ...d, optimizedRoute: optimized, isOptimizing: false }
-                            : d
+                        d.dayNumber === dayNumber ? { ...d, optimizedRoute: mappedOptimizedRoute, isOptimizing: false } : d
                     )
                 );
-                setOptimizedRoute(optimized);
+                setOptimizedRoute(mappedOptimizedRoute);
                 setShowOptimizedMap(true);
-                alert('Optimized route created successfully.');
+                alert(`Day ${dayNumber}: Optimized route created and saved successfully.`);
             })
-            .catch(error => {
-                console.error('Optimization error:', error);
-                setDaysData(prevDays => prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d));
-                alert('Error optimizing route.');
+            .catch((error) => {
+                console.error(`Error optimizing Day ${dayNumber}:`, error);
+                setDaysData(prevDays =>
+                    prevDays.map(d =>
+                        d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d
+                    )
+                );
+                alert(`Error optimizing route for Day ${dayNumber}.`);
             });
     };
 
-    const currentDayData = daysData.find(day => day.dayNumber === dayNumber);
-    const combinedSelectedPlaces = currentDayData?.selectedPlaces || [];
-
+    // Navigation: Next and Previous Day buttons.
     const handleNextDay = () => {
         if (dayNumber < numberOfDays) {
-            const newDay = dayNumber + 1;
             navigate({
-                search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${newDay}`
+                search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${dayNumber + 1}`
             });
+        } else {
+            // Last day: Navigate to Dashboard.
+            navigate('/dashboard');
         }
     };
 
     const handlePreviousDay = () => {
         if (dayNumber > 1) {
-            const newDay = dayNumber - 1;
             navigate({
-                search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${newDay}`
+                search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${dayNumber - 1}`
             });
         }
     };
+
+    const currentDayData = daysData.find(day => day.dayNumber === dayNumber) || { selectedPlaces: [], placesByCategory: { HOTEL: [], RESTAURANT: [], ATTRACTION: [] }, optimizedRoute: [], isOptimizing: false };
+    const combinedSelectedPlaces = currentDayData.selectedPlaces || [];
 
     return (
         <div style={{ display: 'flex', height: '600px' }}>
@@ -186,22 +201,24 @@ const PlacesSelectionWithMap = ({ token }) => {
                                     <div key={place.id}>
                                         <input
                                             type="checkbox"
+                                            id={`day${dayNumber}-place${place.id}`}
                                             checked={currentDayData.selectedPlaces.some(p => p.id === place.id)}
                                             onChange={(e) => handleCheckboxChange(place, e.target.checked)}
                                         />
-                                        <label>{place.name}</label>
+                                        <label htmlFor={`day${dayNumber}-place${place.id}`}>{place.name}</label>
                                     </div>
                                 ))}
                             </div>
                         ))}
                         <div>
-                            <h4>Starting Point</h4>
+                            <h4>Select Starting Point</h4>
                             {currentDayData.selectedPlaces.map(place => (
                                 <div key={place.id}>
                                     <input
                                         type="radio"
-                                        name="startingPoint"
-                                        checked={currentDayData.startingPlaceId === place.id}
+                                        name={`startingPoint-day${dayNumber}`}
+                                        value={place.id}
+                                        checked={Number(currentDayData.startingPlaceId) === place.id}
                                         onChange={() => handleRadioChange(place.id)}
                                     />
                                     <label>{place.name}</label>
@@ -213,10 +230,10 @@ const PlacesSelectionWithMap = ({ token }) => {
                         </button>
                         {currentDayData.optimizedRoute.length > 0 && (
                             <div>
-                                <h4>Optimized Route:</h4>
+                                <h4>Optimized Route (Text):</h4>
                                 <ul>
-                                    {currentDayData.optimizedRoute.map((place, idx) => (
-                                        <li key={idx}>{place.name}</li>
+                                    {currentDayData.optimizedRoute.map((placeObj, idx) => (
+                                        <li key={idx}>{placeObj.name}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -227,22 +244,28 @@ const PlacesSelectionWithMap = ({ token }) => {
                     <button onClick={handlePreviousDay} disabled={dayNumber <= 1}>
                         Previous Day
                     </button>
-                    <button onClick={handleNextDay} disabled={dayNumber >= numberOfDays}>
-                        Next Day
-                    </button>
+                    {dayNumber < numberOfDays ? (
+                        <button onClick={handleNextDay}>
+                            Next Day
+                        </button>
+                    ) : (
+                        <button onClick={handleNextDay}>
+                            Go to Dashboard
+                        </button>
+                    )}
                 </div>
             </div>
 
             <div style={{ flex: 1, padding: '10px' }}>
                 {showOptimizedMap ? (
                     <MapDisplayOptimized
-                        cityCoordinates={cityCoordinatesMapping[cityId]}
+                        cityCoordinates={cityCoordinatesMapping[cityId] || [-87.6298, 41.8781]}
                         route={optimizedRoute}
-                        startingPlace={optimizedRoute[0]}
+                        startingPlace={currentDayData.optimizedRoute[0]}
                     />
                 ) : (
                     <MapDisplayMarkers
-                        cityCoordinates={cityCoordinatesMapping[cityId]}
+                        cityCoordinates={cityCoordinatesMapping[cityId] || [-87.6298, 41.8781]}
                         markers={combinedSelectedPlaces}
                     />
                 )}
