@@ -32,4 +32,6 @@ public class TripDay {
     // JSON string: optimized route (list of place IDs in order)
     @Lob
     private String optimizedRoute;
+    private double totalDistance;
+    private double totalTime;
 }

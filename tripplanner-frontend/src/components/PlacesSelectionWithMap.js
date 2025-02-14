@@ -24,6 +24,8 @@ const PlacesSelectionWithMap = ({ token }) => {
     const [availablePlaces, setAvailablePlaces] = useState({ HOTEL: [], RESTAURANT: [], ATTRACTION: [] });
     const [optimizedRoute, setOptimizedRoute] = useState([]);
     const [showOptimizedMap, setShowOptimizedMap] = useState(false);
+    const [optimizedDistance, setOptimizedDistance] = useState(null);  // New state for distance
+    const [optimizedTime, setOptimizedTime] = useState(null);
 
     // Ensure dayNumber is within valid range and update URL if not present
     useEffect(() => {
@@ -152,6 +154,10 @@ const PlacesSelectionWithMap = ({ token }) => {
                 );
                 setOptimizedRoute(mappedOptimizedRoute);
                 setShowOptimizedMap(true);
+                // Get total distance and time from the response
+                setOptimizedDistance(response.data.totalDistance) // in meters
+                setOptimizedTime(response.data.totalTime); // in hours
+
                 alert(`Day ${dayNumber}: Optimized route created and saved successfully.`);
             })
             .catch((error) => {
@@ -236,12 +242,14 @@ const PlacesSelectionWithMap = ({ token }) => {
                                         <li key={idx}>{placeObj.name}</li>
                                     ))}
                                 </ul>
+                                <h4>Total Distance: {optimizedDistance} m</h4>
+                                <h4>Total Time: {optimizedTime} hour(s)</h4>
                             </div>
                         )}
                     </div>
                 )}
-                <div style={{ marginTop: '10px' }}>
-                    <button onClick={handlePreviousDay} disabled={dayNumber <= 1}>
+                <div style={{marginTop: '10px'}}>
+                <button onClick={handlePreviousDay} disabled={dayNumber <= 1}>
                         Previous Day
                     </button>
                     {dayNumber < numberOfDays ? (

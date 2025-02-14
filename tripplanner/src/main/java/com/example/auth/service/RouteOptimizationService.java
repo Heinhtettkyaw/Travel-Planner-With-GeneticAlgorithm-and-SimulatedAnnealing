@@ -80,4 +80,27 @@ public class RouteOptimizationService {
 
         return optimizedRoute;
     }
+    // New function to calculate the total distance and time
+    public RouteDetails getRouteDetails(List<Place> optimizedRoute) {
+        double totalDistance = 0.0;
+        double totalTime = 0.0;
+
+        // Loop through the optimized route and calculate the distance and time
+        for (int i = 0; i < optimizedRoute.size() - 1; i++) {
+            Place currentPlace = optimizedRoute.get(i);
+            Place nextPlace = optimizedRoute.get(i + 1);
+
+            // Get the distance between current and next place
+            double distance = tomTomService.getRouteDistance(currentPlace, nextPlace);
+            totalDistance += distance;
+
+            // Assuming average speed of 50 km/h, calculate the travel time
+            // Convert distance from meters to kilometers and time to hours
+            double timeInHours = (distance / 1000) / 50.0; // Distance (km) / Speed (km/h)
+            totalTime += timeInHours;
+        }
+
+        // Return the total distance and time
+        return new RouteDetails(totalDistance, totalTime);
+    }
 }

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.auth.service.RouteDetails;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -155,17 +155,23 @@ public class TripController {
 
             List<Place> optimizedRoute = routeOptimizationService.optimizeRoute(startingPlace, places);
 
+            RouteDetails routeDetails = routeOptimizationService.getRouteDetails(optimizedRoute);
             List<String> optimizedRouteNames = new ArrayList<>();
             for (Place p : optimizedRoute) {
                 optimizedRouteNames.add(p.getName());
             }
 
+
             tripDay.setOptimizedRoute(objectMapper.writeValueAsString(optimizedRouteNames));
+            tripDay.setTotalDistance(routeDetails.getTotalDistance());
+            tripDay.setTotalTime(routeDetails.getTotalTime());
             tripDayRepository.save(tripDay);
 
             return ResponseEntity.ok(Map.of(
                     "message", "Route optimized successfully",
-                    "optimizedRoute", optimizedRouteNames
+                    "optimizedRoute", optimizedRouteNames,
+                    "totalDistance", routeDetails.getTotalDistance(),
+                    "totalTime", routeDetails.getTotalTime()
             ));
         } catch (Exception ex) {
             ex.printStackTrace();
