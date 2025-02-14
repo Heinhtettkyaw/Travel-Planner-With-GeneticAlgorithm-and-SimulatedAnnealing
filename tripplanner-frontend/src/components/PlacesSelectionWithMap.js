@@ -5,7 +5,7 @@ import MapDisplayMarkers from './MapDisplayMarkers';
 import MapDisplayOptimized from './MapDisplayOptimized';
 
 const cityCoordinatesMapping = {
-    "1": [-118.2437, 34.0522],  // Los Angeles
+    "1": [94.858543, 21.171726],  // Bagan
     "2": [-74.0060, 40.7128],    // New York
     "3": [-87.6298, 41.8781]     // Chicago
 };
@@ -24,8 +24,9 @@ const PlacesSelectionWithMap = ({ token }) => {
     const [availablePlaces, setAvailablePlaces] = useState({ HOTEL: [], RESTAURANT: [], ATTRACTION: [] });
     const [optimizedRoute, setOptimizedRoute] = useState([]);
     const [showOptimizedMap, setShowOptimizedMap] = useState(false);
-    const [optimizedDistance, setOptimizedDistance] = useState(null);  // New state for distance
+    const [optimizedDistance, setOptimizedDistance] = useState(null);
     const [optimizedTime, setOptimizedTime] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Ensure dayNumber is within valid range and update URL if not present
     useEffect(() => {
@@ -81,21 +82,31 @@ const PlacesSelectionWithMap = ({ token }) => {
         setShowOptimizedMap(false);
     }, [dayNumber]);
 
-    // Event handlers using current dayNumber
+    // Event handler for checkbox change (max 9 places)
     const handleCheckboxChange = (place, checked) => {
+        const maxPlaces = 9;
         setDaysData(prevDays =>
             prevDays.map(day => {
                 if (day.dayNumber === dayNumber) {
                     let newSelected = checked
                         ? [...day.selectedPlaces, place]
                         : day.selectedPlaces.filter(p => p.id !== place.id);
-                    return { ...day, selectedPlaces: newSelected };
+
+                    // Limit to 9 places per day
+                    if (newSelected.length > maxPlaces) {
+                        setErrorMessage(`You can select a maximum of ${maxPlaces} places per day.`);
+                        return day; // No changes if exceeded
+                    } else {
+                        setErrorMessage('');
+                        return { ...day, selectedPlaces: newSelected };
+                    }
                 }
                 return day;
             })
         );
     };
 
+    // Event handler for selecting starting point (radio button)
     const handleRadioChange = (placeId) => {
         setDaysData(prevDays =>
             prevDays.map(day =>
@@ -104,9 +115,11 @@ const PlacesSelectionWithMap = ({ token }) => {
         );
     };
 
+    // Optimize the route for the current day
     const optimizeDay = () => {
         const day = daysData.find(d => d.dayNumber === dayNumber);
         if (!day) return;
+
         setDaysData(prevDays =>
             prevDays.map(d =>
                 d.dayNumber === dayNumber ? { ...d, isOptimizing: true } : d
@@ -114,28 +127,21 @@ const PlacesSelectionWithMap = ({ token }) => {
         );
 
         if (day.selectedPlaces.length === 0) {
-            alert(`Please select at least one place for Day ${dayNumber}`);
-            setDaysData(prevDays =>
-                prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d)
-            );
-            return;
-        }
-        if (!day.startingPlaceId) {
-            alert(`Please select a starting point for Day ${dayNumber}`);
-            setDaysData(prevDays =>
-                prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d)
-            );
+            alert('Please select at least one place.');
+            setDaysData(prevDays => prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d));
             return;
         }
 
-        const payload = {
+        if (!day.startingPlaceId) {
+            alert('Please select a starting point.');
+            setDaysData(prevDays => prevDays.map(d => d.dayNumber === dayNumber ? { ...d, isOptimizing: false } : d));
+            return;
+        }
+
+        axios.post(`http://localhost:8081/api/trip/${tripId}/day/${dayNumber}/optimize`, {
             selectedPlaces: day.selectedPlaces.map(p => p.id),
             startingPlaceId: day.startingPlaceId.toString()
-        };
-
-        axios.post(`http://localhost:8081/api/trip/${tripId}/day/${dayNumber}/optimize`, payload, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        }, { headers: { Authorization: `Bearer ${token}` } })
             .then((response) => {
                 const optimizedNames = response.data.optimizedRoute;
                 const combinedAvailablePlaces = [
@@ -154,9 +160,8 @@ const PlacesSelectionWithMap = ({ token }) => {
                 );
                 setOptimizedRoute(mappedOptimizedRoute);
                 setShowOptimizedMap(true);
-                // Get total distance and time from the response
-                setOptimizedDistance(response.data.totalDistance) // in meters
-                setOptimizedTime(response.data.totalTime); // in hours
+                setOptimizedDistance(response.data.totalDistance);
+                setOptimizedTime(response.data.totalTime);
 
                 alert(`Day ${dayNumber}: Optimized route created and saved successfully.`);
             })
@@ -171,15 +176,14 @@ const PlacesSelectionWithMap = ({ token }) => {
             });
     };
 
-    // Navigation: Next and Previous Day buttons.
+    // Navigation: Go to the next day or Dashboard
     const handleNextDay = () => {
         if (dayNumber < numberOfDays) {
             navigate({
                 search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${dayNumber + 1}`
             });
         } else {
-            // Last day: Navigate to Dashboard.
-            navigate('/dashboard');
+            navigate('/dashboard');  // Go to Dashboard on last day
         }
     };
 
@@ -243,13 +247,13 @@ const PlacesSelectionWithMap = ({ token }) => {
                                     ))}
                                 </ul>
                                 <h4>Total Distance: {optimizedDistance} m</h4>
-                                <h4>Total Time: {optimizedTime} hour(s)</h4>
+                                {/*<h4>Total Time: {optimizedTime} hour(s)</h4>*/}
                             </div>
                         )}
                     </div>
                 )}
-                <div style={{marginTop: '10px'}}>
-                <button onClick={handlePreviousDay} disabled={dayNumber <= 1}>
+                <div style={{ marginTop: '10px' }}>
+                    <button onClick={handlePreviousDay} disabled={dayNumber <= 1}>
                         Previous Day
                     </button>
                     {dayNumber < numberOfDays ? (

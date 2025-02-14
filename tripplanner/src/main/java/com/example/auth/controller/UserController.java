@@ -80,7 +80,22 @@ public ResponseEntity<?> register(@RequestBody Map<String, String> userData) {
     try {
         String username = userData.get("username");
         String password = userData.get("password");
+        String confirmPassword = userData.get("confirmPassword");
+        String email = userData.get("email");
+        String phone = userData.get("phone");
+        String gender = userData.get("gender");
+        String fullName = userData.get("fullName");
+        // Validate that confirm password matches
+//        if (!password.equals(confirmPassword)) {
+//            return ResponseEntity.badRequest().body(Map.of("error", "Passwords do not match."));
+//        }
 
+        // Validate password: at least 6 characters, one capital letter, one number.
+        // Regex: At least one digit, one uppercase letter, and minimum 6 characters.
+//        if (!password.matches("^(?=.*[A-Z])(?=.*\\d).{6,}$")) {
+//            return ResponseEntity.badRequest().body(
+//                    Map.of("error", "Password must be at least 6 characters, include one capital letter and one number."));
+//        }
         if (userRepository.findByUsername(username).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists."));
         }
@@ -90,7 +105,10 @@ public ResponseEntity<?> register(@RequestBody Map<String, String> userData) {
         newUser.setPassword(passwordEncoder.encode(password));
         // Always set role to USER for registration.
         newUser.setRole(Role.USER);
-
+        newUser.setEmail(email);
+        newUser.setPhone(phone);
+        newUser.setGender(gender);
+        newUser.setFullName(fullName);
         userRepository.save(newUser);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully."));
