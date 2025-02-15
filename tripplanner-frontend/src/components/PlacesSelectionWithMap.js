@@ -94,7 +94,8 @@ const PlacesSelectionWithMap = ({ token }) => {
 
                     // Limit to 9 places per day
                     if (newSelected.length > maxPlaces) {
-                        setErrorMessage(`You can select a maximum of ${maxPlaces} places per day.`);
+                        // setErrorMessage(`You can select a maximum of ${maxPlaces} places per day.`);
+                        alert(`You can select a maximum of ${maxPlaces} places per day.`);
                         return day; // No changes if exceeded
                     } else {
                         setErrorMessage('');
