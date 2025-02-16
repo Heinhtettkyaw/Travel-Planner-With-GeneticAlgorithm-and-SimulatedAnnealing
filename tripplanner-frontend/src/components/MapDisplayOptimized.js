@@ -41,14 +41,24 @@ const MapDisplayOptimized = ({ cityCoordinates, route }) => {
                 setRetryCount(prev => prev + 1);
                 console.log("Retrying to load the map style...");
                 map.current?.resize();  // Force a resize to check if the map can load the style
+                checkStyleLoaded();     // Check if the style is loaded and retry adding sources
             }, 1000);
 
             return () => clearTimeout(timeout); // Cleanup timeout on unmount or change
         }
     }, [isMapLoaded, retryCount]);
 
+    const checkStyleLoaded = () => {
+        if (map.current && map.current.isStyleLoaded()) {
+            attemptToAddPolyline(); // Add the source and layer once style is fully loaded
+        } else {
+            console.log("Style not loaded, retrying...");
+            setRetryCount(prev => prev + 1);
+        }
+    };
+
     // Add markers and polyline once the map is fully loaded
-    useEffect(() => {
+    useEffect(() =>{
         if (!map.current || !isMapLoaded || !route || route.length === 0) return;
 
         // Remove previous markers and polyline if any

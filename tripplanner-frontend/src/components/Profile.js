@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const Profile = () => {
+    const [tab, setTab] = useState('edit'); // Default tab: Edit Profile
+    const [userData, setUserData] = useState(null); // Holds the fetched user data
+    const [editData, setEditData] = useState({}); // Holds the form data for editing
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await axios.get('http://localhost:8081/auth/profile', {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            const data = response.data; // Fetched user data
+            setUserData(data); // Store the fetched data in state
+            setEditData(data); // Pre-fill the edit form with the fetched data
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put('http://localhost:8081/auth/profile/update', editData, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            alert('Profile updated successfully');
+            fetchUserProfile(); // Refresh the data after update
+        } catch (error) {
+            console.error(error.response ? error.response.data : error.message);
+        }
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:8081/auth/profile/change-password', passwordData, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            alert('Password changed successfully');
+        } catch (error) {
+            console.error(error.response ? error.response.data : error.message);
+        }
+    };
+
+    return (
+        <div className="flex h-screen">
+            {/* Left Sidebar Menu */}
+            <div className="w-1/5 bg-gray-200 flex flex-col justify-center items-center py-4 border-r border-gray-300">
+                <h3 className="text-lg font-bold mb-4">Profile</h3>
+                <button
+                    onClick={() => setTab('edit')}
+                    className={`w-full py-2 px-4 rounded-md mb-2 text-left ${
+                        tab === 'edit' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
+                    }`}
+                >
+                    Edit Profile
+                </button>
+                <button
+                    onClick={() => setTab('password')}
+                    className={`w-full py-2 px-4 rounded-md text-left ${
+                        tab === 'password' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
+                    }`}
+                >
+                    Change Password
+                </button>
+            </div>
+
+            {/* Right Content Area */}
+            <div className="w-4/5 p-6">
+                {tab === 'edit' && (
+                    <form onSubmit={handleEditSubmit} className="space-y-4">
+                        <h2 className="text-2xl font-bold">Edit Profile</h2>
+                        <input
+                            type="text"
+                            placeholder="Full Name"
+                            value={editData.fullName || ''}
+                            onChange={(e) =>
+                                setEditData({ ...editData, fullName: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={editData.email || ''}
+                            onChange={(e) =>
+                                setEditData({ ...editData, email: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Phone"
+                            value={editData.phone || ''}
+                            onChange={(e) =>
+                                setEditData({ ...editData, phone: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        />
+                        <select
+                            value={editData.gender || ''}
+                            onChange={(e) =>
+                                setEditData({ ...editData, gender: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="" disabled hidden>
+                                Select Gender
+                            </option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
+                        >
+                            Save Changes
+                        </button>
+                    </form>
+                )}
+
+                {tab === 'password' && (
+                    <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                        <h2 className="text-2xl font-bold">Change Password</h2>
+                        <input
+                            type="password"
+                            placeholder="Old Password"
+                            value={passwordData.oldPassword}
+                            onChange={(e) =>
+                                setPasswordData({ ...passwordData, oldPassword: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        />
+                        <input
+                            type="password"
+                            placeholder="New Password"
+                            value={passwordData.newPassword}
+                            onChange={(e) =>
+                                setPasswordData({ ...passwordData, newPassword: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Confirm Password"
+                            value={passwordData.confirmPassword}
+                            onChange={(e) =>
+                                setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                        />
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
+                        >
+                            Change Password
+                        </button>
+                    </form>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default Profile;

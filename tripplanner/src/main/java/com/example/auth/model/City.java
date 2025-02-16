@@ -16,4 +16,6 @@ public class City {
 
     @Column(unique = true, nullable = false)
     private String name;
+    private double latitude; // Add this field for city latitude
+    private double longitude;
 }

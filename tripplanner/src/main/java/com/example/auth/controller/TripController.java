@@ -255,4 +255,23 @@ public class TripController {
                     .body(Map.of("error", "Failed to fetch trips", "message", ex.getMessage()));
         }
     }
+
+    @DeleteMapping("/{tripId}")
+    public ResponseEntity<Map<String, String>> deleteTrip(@PathVariable Long tripId, Authentication auth) {
+        try {
+            User currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new RuntimeException("Trip not found"));
+
+            if (!trip.getUser().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+            }
+
+            tripRepository.delete(trip);
+            return ResponseEntity.ok(Map.of("message", "Trip deleted successfully"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to delete trip", "message", ex.getMessage()));
+        }
+    }
 }

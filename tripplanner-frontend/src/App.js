@@ -4,11 +4,12 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import LoginSignup from './components/LoginSignup';
 import Dashboard from './components/Dashboard';
 import TripForm from './components/TripForm';
-import PlacesSelection from './components/PlacesSelection';
+
 import TripReview from './components/TripReview';
 import PlacesSelectionWithMap from './components/PlacesSelectionWithMap';
-import TripFormWithMap from './components/TripFormWithMap';
 
+import MainLayout from './components/MainLayout';
+import Profile from './components/Profile';
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   if (token) {
@@ -19,10 +20,14 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginSignup setToken={setToken} />} />
+
+          <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard token={token} setToken={setToken} />} />
           <Route path="/trip" element={<TripForm token={token} />} />
           <Route path="/places" element={<PlacesWrapper token={token} />} />
           <Route path="/review/:tripId" element={<TripReview token={token} />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
         </Routes>
       </Router>
   );
