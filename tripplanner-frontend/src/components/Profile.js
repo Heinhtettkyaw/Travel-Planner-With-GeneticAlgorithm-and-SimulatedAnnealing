@@ -8,7 +8,7 @@ const Profile = () => {
     const [passwordData, setPasswordData] = useState({
         oldPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
     });
 
     useEffect(() => {
@@ -18,7 +18,7 @@ const Profile = () => {
     const fetchUserProfile = async () => {
         try {
             const response = await axios.get('http://localhost:8081/auth/profile', {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             const data = response.data; // Fetched user data
             setUserData(data); // Store the fetched data in state
@@ -32,7 +32,7 @@ const Profile = () => {
         e.preventDefault();
         try {
             await axios.put('http://localhost:8081/auth/profile/update', editData, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             alert('Profile updated successfully');
             fetchUserProfile(); // Refresh the data after update
@@ -45,7 +45,7 @@ const Profile = () => {
         e.preventDefault();
         try {
             await axios.post('http://localhost:8081/auth/profile/change-password', passwordData, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             alert('Password changed successfully');
         } catch (error) {
@@ -56,28 +56,33 @@ const Profile = () => {
     return (
         <div className="flex h-screen">
             {/* Left Sidebar Menu */}
-            <div className="w-1/5 bg-gray-200 flex flex-col justify-center items-center py-4 border-r border-gray-300">
-                <h3 className="text-lg font-bold mb-4">Profile</h3>
-                <button
-                    onClick={() => setTab('edit')}
-                    className={`w-full py-2 px-4 rounded-md mb-2 text-left ${
-                        tab === 'edit' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
-                    }`}
-                >
-                    Edit Profile
-                </button>
-                <button
-                    onClick={() => setTab('password')}
-                    className={`w-full py-2 px-4 rounded-md text-left ${
-                        tab === 'password' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
-                    }`}
-                >
-                    Change Password
-                </button>
+            <div className="w-64 bg-gray-200 flex flex-col justify-between py-4 border-r border-gray-300">
+                <div className="space-y-2 px-4">
+                    <h3 className="text-lg font-bold mb-4">Profile</h3>
+                    <button
+                        onClick={() => setTab('edit')}
+                        className={`py-2 px-4 rounded-md text-left w-full ${
+                            tab === 'edit' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
+                        }`}
+                    >
+                        Edit Profile
+                    </button>
+                    <button
+                        onClick={() => setTab('password')}
+                        className={`py-2 px-4 rounded-md text-left w-full ${
+                            tab === 'password' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
+                        }`}
+                    >
+                        Change Password
+                    </button>
+                </div>
+                <div className="mt-auto px-4">
+                    <p className="text-sm text-gray-600 text-center">&copy; 2023 Your App Name</p>
+                </div>
             </div>
 
             {/* Right Content Area */}
-            <div className="w-4/5 p-6">
+            <div className="flex-1 p-6 overflow-y-auto">
                 {tab === 'edit' && (
                     <form onSubmit={handleEditSubmit} className="space-y-4">
                         <h2 className="text-2xl font-bold">Edit Profile</h2>
@@ -130,7 +135,6 @@ const Profile = () => {
                         </button>
                     </form>
                 )}
-
                 {tab === 'password' && (
                     <form onSubmit={handlePasswordSubmit} className="space-y-4">
                         <h2 className="text-2xl font-bold">Change Password</h2>

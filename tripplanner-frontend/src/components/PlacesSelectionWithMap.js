@@ -205,64 +205,74 @@ const PlacesSelectionWithMap = ({ token }) => {
     };
 
     return (
-        <div style={{ display: 'flex', height: '600px' }}>
-            <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
-                <h2>Day {dayNumber} of {numberOfDays}</h2>
+        <div className="flex h-[700px]">
+            {/* Left Panel */}
+            <div className="flex-1 p-2.5 overflow-y-auto">
+                <h2 className="text-lg font-bold">Day {dayNumber} of {numberOfDays}</h2>
                 {daysData.length > 0 && (
-                    <div style={{ border: '1px solid #ccc', marginBottom: '10px', padding: '10px' }}>
+                    <div className="border border-gray-300 mb-2.5 p-2.5">
                         {['HOTEL', 'RESTAURANT', 'ATTRACTION'].map(category => (
                             <div key={category}>
-                                <h4>{category}</h4>
+                                <h4 className="text-base font-semibold">{category}</h4>
                                 {currentDayData.placesByCategory[category]?.map(place => (
-                                    <div key={place.id}>
+                                    <div key={place.id} className="flex items-center gap-2">
                                         <input
                                             type="checkbox"
                                             id={`day${dayNumber}-place${place.id}`}
                                             checked={currentDayData.selectedPlaces.some(p => p.id === place.id)}
                                             onChange={(e) => handleCheckboxChange(place, e.target.checked)}
+                                            className="form-checkbox"
                                         />
-                                        <label htmlFor={`day${dayNumber}-place${place.id}`}>{place.name}</label>
+                                        <label htmlFor={`day${dayNumber}-place${place.id}`} className="cursor-pointer">
+                                            {place.name}
+                                        </label>
                                     </div>
                                 ))}
                             </div>
                         ))}
                         <div>
-                            <h4>Select Starting Point</h4>
+                            <h4 className="text-base font-semibold">Select Starting Point</h4>
                             {currentDayData.selectedPlaces.map(place => (
-                                <div key={place.id}>
+                                <div key={place.id} className="flex items-center gap-2">
                                     <input
                                         type="radio"
                                         name={`startingPoint-day${dayNumber}`}
                                         value={place.id}
                                         checked={Number(currentDayData.startingPlaceId) === place.id}
                                         onChange={() => handleRadioChange(place.id)}
+                                        className="form-radio"
                                     />
-                                    <label>{place.name}</label>
+                                    <label className="cursor-pointer">{place.name}</label>
                                 </div>
                             ))}
                         </div>
-                        <button onClick={optimizeDay} disabled={currentDayData.isOptimizing}>
+                        <button
+                            onClick={optimizeDay}
+                            disabled={currentDayData.isOptimizing}
+                            className="mt-2.5 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+                        >
                             {currentDayData.isOptimizing ? 'Optimizing...' : 'Optimize Route'}
                         </button>
                         {currentDayData.optimizedRoute.length > 0 && (
                             <div>
-                                <h4>Optimized Route (Text):</h4>
-                                <ul>
+                                <h4 className="text-base font-semibold mt-2.5">Optimized Route (Text):</h4>
+                                <ul className="list-disc pl-5">
                                     {currentDayData.optimizedRoute.map((placeObj, idx) => (
                                         <li key={idx}>{placeObj.name}</li>
                                     ))}
                                 </ul>
-                                <h4>Total Distance: {optimizedDistance} m</h4>
+                                <h4 className="text-base font-semibold mt-2.5">Total Distance: {optimizedDistance} m</h4>
                             </div>
                         )}
                     </div>
                 )}
-                <div style={{ marginTop: '10px' }}>
+                <div className="mt-2.5 flex justify-between">
                     <button
                         onClick={() => navigate({
                             search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${Math.max(dayNumber - 1, 1)}`
                         })}
                         disabled={dayNumber <= 1}
+                        className="px-4 py-2 bg-gray-500 text-white rounded disabled:bg-gray-400"
                     >
                         Previous Day
                     </button>
@@ -271,21 +281,27 @@ const PlacesSelectionWithMap = ({ token }) => {
                             onClick={() => navigate({
                                 search: `?tripId=${tripId}&cityId=${cityId}&numberOfDays=${numberOfDays}&dayNumber=${dayNumber + 1}`
                             })}
+                            className="px-4 py-2 bg-blue-500 text-white rounded"
                         >
                             Next Day
                         </button>
                     ) : (
-                        <button onClick={() => navigate('/dashboard')}>
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="px-4 py-2 bg-green-500 text-white rounded"
+                        >
                             Go to Dashboard
                         </button>
                     )}
                 </div>
             </div>
-            <div style={{ flex: 1, padding: '10px' }}>
+
+            {/* Right Panel */}
+            <div className="flex-1 p-2.5">
                 {showOptimizedMap ? (
                     <MapDisplayOptimized cityCoordinates={cityCoordinates} route={optimizedRoute} />
                 ) : (
-                    <MapDisplayMarkers cityCoordinates={cityCoordinates} markers={currentDayData.selectedPlaces} />
+                    <MapDisplayMarkers cityCoordinates={cityCoordinates} markers={currentDayData.selectedPlaces}/>
                 )}
             </div>
         </div>

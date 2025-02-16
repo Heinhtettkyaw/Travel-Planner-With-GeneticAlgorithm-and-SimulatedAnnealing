@@ -13,6 +13,7 @@ import ManagePlaces from './components/ManagePlaces';
 
 import MainLayout from './components/MainLayout';
 import Profile from './components/Profile';
+import './index.css'; // Import your CSS file
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   if (token) {

@@ -1,4 +1,3 @@
-// src/components/MainLayout.js
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
@@ -9,11 +8,12 @@ import Navbar from './Navbar';
  */
 const MainLayout = () => {
     return (
-        <div>
+        <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Navigation bar */}
             <Navbar />
+
             {/* Main content area */}
-            <div style={{ padding: '20px' }}>
+            <div className="flex-grow p-6">
                 {/* Outlet renders the child route component */}
                 <Outlet />
             </div>

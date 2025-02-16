@@ -4,7 +4,14 @@ import axios from 'axios';
 const ManagePlaces = ({ token }) => {
     const [places, setPlaces] = useState([]);
     const [cities, setCities] = useState([]);
-    const [formData, setFormData] = useState({ id: null, name: '', category: 'ATTRACTION', cityId: '', latitude: '', longitude: '' });
+    const [formData, setFormData] = useState({
+        id: null,
+        name: '',
+        category: 'ATTRACTION',
+        cityId: '',
+        latitude: '',
+        longitude: '',
+    });
     const [editing, setEditing] = useState(false);
 
     useEffect(() => {
@@ -13,19 +20,21 @@ const ManagePlaces = ({ token }) => {
     }, [token]);
 
     const fetchPlaces = () => {
-        axios.get('http://localhost:8081/admin/places', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(res => setPlaces(res.data))
-            .catch(err => console.error(err));
+        axios
+            .get('http://localhost:8081/admin/places', {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => setPlaces(res.data))
+            .catch((err) => console.error(err));
     };
 
     const fetchCities = () => {
-        axios.get('http://localhost:8081/admin/cities', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(res => setCities(res.data))
-            .catch(err => console.error(err));
+        axios
+            .get('http://localhost:8081/admin/cities', {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => setCities(res.data))
+            .catch((err) => console.error(err));
     };
 
     const handleChange = (e) => {
@@ -35,24 +44,40 @@ const ManagePlaces = ({ token }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editing) {
-            axios.put(`http://localhost:8081/admin/places/${formData.id}`, formData, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
+            axios
+                .put(`http://localhost:8081/admin/places/${formData.id}`, formData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
                 .then(() => {
                     fetchPlaces();
-                    setFormData({ id: null, name: '', category: 'ATTRACTION', cityId: '', latitude: '', longitude: '' });
+                    setFormData({
+                        id: null,
+                        name: '',
+                        category: 'ATTRACTION',
+                        cityId: '',
+                        latitude: '',
+                        longitude: '',
+                    });
                     setEditing(false);
                 })
-                .catch(err => console.error(err));
+                .catch((err) => console.error(err));
         } else {
-            axios.post('http://localhost:8081/admin/places', formData, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
+            axios
+                .post('http://localhost:8081/admin/places', formData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
                 .then(() => {
                     fetchPlaces();
-                    setFormData({ id: null, name: '', category: 'ATTRACTION', cityId: '', latitude: '', longitude: '' });
+                    setFormData({
+                        id: null,
+                        name: '',
+                        category: 'ATTRACTION',
+                        cityId: '',
+                        latitude: '',
+                        longitude: '',
+                    });
                 })
-                .catch(err => console.error(err));
+                .catch((err) => console.error(err));
         }
     };
 
@@ -69,43 +94,145 @@ const ManagePlaces = ({ token }) => {
     };
 
     const handleDelete = (id) => {
-        axios.delete(`http://localhost:8081/admin/places/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
+        axios
+            .delete(`http://localhost:8081/admin/places/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             .then(fetchPlaces)
-            .catch(err => console.error(err));
+            .catch((err) => console.error(err));
     };
 
     return (
-        <div>
-            <h3>Manage Places</h3>
-            <form onSubmit={handleSubmit}>
-                <input type="text" name="name" placeholder="Place Name" value={formData.name} onChange={handleChange} required />
-                <select name="category" value={formData.category} onChange={handleChange}>
-                    <option value="HOTEL">HOTEL</option>
-                    <option value="RESTAURANT">RESTAURANT</option>
-                    <option value="ATTRACTION">ATTRACTION</option>
-                </select>
-                <select name="cityId" value={formData.cityId} onChange={handleChange} required>
-                    <option value="">Select City</option>
-                    {cities.map(city => (
-                        <option key={city.id} value={city.id}>{city.name}</option>
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-md shadow-lg w-full max-w-4xl">
+                <h3 className="text-2xl font-bold mb-6">Manage Places</h3>
+
+                {/* Place Form */}
+                <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Place Name:</label>
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Enter place name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Category:</label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        >
+                            <option value="HOTEL">HOTEL</option>
+                            <option value="RESTAURANT">RESTAURANT</option>
+                            <option value="ATTRACTION">ATTRACTION</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">City:</label>
+                        <select
+                            name="cityId"
+                            value={formData.cityId}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        >
+                            <option value="">Select City</option>
+                            {cities.map((city) => (
+                                <option key={city.id} value={city.id}>
+                                    {city.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Latitude:</label>
+                        <input
+                            type="number"
+                            name="latitude"
+                            placeholder="Enter latitude"
+                            value={formData.latitude}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Longitude:</label>
+                        <input
+                            type="number"
+                            name="longitude"
+                            placeholder="Enter longitude"
+                            value={formData.longitude}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            type="submit"
+                            className="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-md shadow-sm transition duration-300"
+                        >
+                            {editing ? 'Update Place' : 'Add Place'}
+                        </button>
+                        {editing && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEditing(false);
+                                    setFormData({
+                                        id: null,
+                                        name: '',
+                                        category: 'ATTRACTION',
+                                        cityId: '',
+                                        latitude: '',
+                                        longitude: '',
+                                    });
+                                }}
+                                className="w-full md:w-auto bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-4 py-2 rounded-md shadow-sm transition duration-300"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </form>
+
+                {/* Place List */}
+                <ul className="space-y-2">
+                    {places.map((place) => (
+                        <li
+                            key={place.id}
+                            className="flex justify-between items-center bg-gray-50 p-4 rounded-md shadow-sm"
+                        >
+                            <span className="text-gray-700">
+                                {place.name} - {place.category} in{' '}
+                                {place.city ? place.city.name : 'Unknown'} ({place.latitude}, {place.longitude})
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleEdit(place)}
+                                    className="bg-green-500 hover:bg-green-600 text-white font-medium px-3 py-1 rounded-md shadow-sm transition duration-300"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(place.id)}
+                                    className="bg-red-500 hover:bg-red-600 text-white font-medium px-3 py-1 rounded-md shadow-sm transition duration-300"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
                     ))}
-                </select>
-                <input type="number" name="latitude" placeholder="Latitude" value={formData.latitude} onChange={handleChange} required />
-                <input type="number" name="longitude" placeholder="Longitude" value={formData.longitude} onChange={handleChange} required />
-                <button type="submit">{editing ? 'Update Place' : 'Add Place'}</button>
-                {editing && <button type="button" onClick={() => { setEditing(false); setFormData({ id: null, name: '', category: 'ATTRACTION', cityId: '', latitude: '', longitude: '' }); }}>Cancel</button>}
-            </form>
-            <ul>
-                {places.map(place => (
-                    <li key={place.id}>
-                        {place.name} - {place.category} in {place.city ? place.city.name : 'Unknown'} ({place.latitude}, {place.longitude})
-                        <button onClick={() => handleEdit(place)}>Edit</button>
-                        <button onClick={() => handleDelete(place.id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
+                </ul>
+            </div>
         </div>
     );
 };

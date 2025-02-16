@@ -15,7 +15,7 @@ const MapDisplayOptimized = ({ cityCoordinates, route }) => {
     // Initialize the map
     useEffect(() => {
         map.current = tt.map({
-            key: 'uNSdjqZ8dnSQJcmSSCqsZfUrQLKQQ9l6', // Replace with your actual TomTom API key.
+            key: 'r6Zz1gedoou8Na9nfWGdW016EJ0GX95u', // Replace with your actual TomTom API key.
             container: mapElement.current,
             center: cityCoordinates, // [longitude, latitude]
             zoom: 12,
@@ -207,7 +207,7 @@ const MapDisplayOptimized = ({ cityCoordinates, route }) => {
         }
     };
 
-    return <div ref={mapElement} style={{ width: '100%', height: '100%' }}></div>;
+    return <div ref={mapElement}  style={{ width: '100%', height: '100%' }}></div>;
 };
 
 export default MapDisplayOptimized;
