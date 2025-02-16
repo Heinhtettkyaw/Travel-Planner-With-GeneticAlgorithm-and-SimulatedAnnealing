@@ -7,6 +7,9 @@ import TripForm from './components/TripForm';
 
 import TripReview from './components/TripReview';
 import PlacesSelectionWithMap from './components/PlacesSelectionWithMap';
+import AdminDashboard from './components/AdminDashboard';
+import ManageCities from './components/ManageCities';
+import ManagePlaces from './components/ManagePlaces';
 
 import MainLayout from './components/MainLayout';
 import Profile from './components/Profile';
@@ -27,6 +30,12 @@ function App() {
           <Route path="/places" element={<PlacesWrapper token={token} />} />
           <Route path="/review/:tripId" element={<TripReview token={token} />} />
             <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          <Route path="/admin" element={<AdminDashboard />}>
+            <Route path="cities" element={<ManageCities token={token} />} />
+            <Route path="places" element={<ManagePlaces token={token} />} />
+
           </Route>
         </Routes>
       </Router>

@@ -23,13 +23,11 @@ const LoginSignup = ({ setToken }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Check if passwords match for registration
         if (!isLogin && password !== confirmPassword) {
             setErrorMessage('Passwords do not match');
             return;
         }
 
-        // Validate password for registration
         if (!isLogin && !validatePassword(password)) {
             setErrorMessage('Password must be at least 6 characters long, contain 1 capital letter and 1 number');
             return;
@@ -40,28 +38,27 @@ const LoginSignup = ({ setToken }) => {
             ? { username, password }
             : { username, password, confirmPassword, email, phone, fullName, gender };
 
-        // Log the request data to see what's being sent
-        console.log("Request Data:", requestData);
-
         axios.post(url, requestData)
             .then(response => {
                 if (isLogin) {
-                    const token = response.data.token;
+                    const { token, role } = response.data;
                     localStorage.setItem('token', token);
                     localStorage.setItem('username', username);
+                    localStorage.setItem('role', role);
                     setToken(token);
-                    navigate('/dashboard');
+                    // Redirect based on role
+                    if (role === 'ADMIN') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/dashboard');
+                    }
                 } else {
                     alert('Registration successful. Please login.');
                     setIsLogin(true);
                 }
             })
             .catch(error => {
-                console.error('Error during authentication:', error);
-
-                // Log the error response for debugging
                 if (error.response) {
-                    console.error('Backend Error:', error.response.data);
                     setErrorMessage(error.response.data.message || 'Authentication error');
                 } else {
                     setErrorMessage('Network error or server unreachable');
@@ -92,7 +89,6 @@ const LoginSignup = ({ setToken }) => {
                         required
                     />
                 </div>
-                {/* Show confirm password only if it's the sign-up page */}
                 {!isLogin && (
                     <div>
                         <label>Confirm Password:</label>
@@ -104,7 +100,6 @@ const LoginSignup = ({ setToken }) => {
                         />
                     </div>
                 )}
-                {/* Show additional fields only if it's the sign-up page */}
                 {!isLogin && (
                     <>
                         <div>
@@ -145,9 +140,7 @@ const LoginSignup = ({ setToken }) => {
                         </div>
                     </>
                 )}
-                <div>
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-                </div>
+                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 <button type="submit">{isLogin ? 'Login' : 'Sign Up'}</button>
             </form>
             <button onClick={() => setIsLogin(!isLogin)}>
