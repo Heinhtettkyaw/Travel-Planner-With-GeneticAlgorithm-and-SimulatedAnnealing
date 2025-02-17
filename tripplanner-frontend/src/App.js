@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import LoginSignup from './components/LoginSignup';
 import Dashboard from './components/Dashboard';
 import TripForm from './components/TripForm';
-
+import LandingPage from './components/LandingPage';
 import TripReview from './components/TripReview';
 import PlacesSelectionWithMap from './components/PlacesSelectionWithMap';
 import AdminDashboard from './components/AdminDashboard';
@@ -23,7 +23,10 @@ function App() {
   return (
       <Router>
         <Routes>
-          <Route path="/" element={<LoginSignup setToken={setToken} />} />
+          {/* Landing Page Route */}
+          <Route path="/" element={<LandingPage />} />
+
+          <Route path="/login" element={<LoginSignup setToken={setToken} />} />
 
           <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard token={token} setToken={setToken} />} />

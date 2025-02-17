@@ -20,3 +20,18 @@ code {
   /* Reset any Tailwind styles */
   all: initial;
 }
+@keyframes livePhoto {
+  0% {
+    transform: scale(1.02) translateY(0);
+  }
+  50% {
+    transform: scale(1.01) translateY(-2%);
+  }
+  100% {
+    transform: scale(1.02) translateY(0);
+  }
+}
+
+.animate-livePhoto {
+  animation: livePhoto 8s ease-in-out infinite;
+}

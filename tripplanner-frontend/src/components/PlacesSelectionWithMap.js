@@ -205,7 +205,7 @@ const PlacesSelectionWithMap = ({ token }) => {
     };
 
     return (
-        <div className="flex h-[700px]">
+        <div className="flex h-[7   00px]">
             {/* Left Panel */}
             <div className="flex-1 p-2.5 overflow-y-auto">
                 <h2 className="text-lg font-bold">Day {dayNumber} of {numberOfDays}</h2>
