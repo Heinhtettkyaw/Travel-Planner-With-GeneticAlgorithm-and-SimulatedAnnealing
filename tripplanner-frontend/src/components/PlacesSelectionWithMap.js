@@ -296,6 +296,16 @@ const PlacesSelectionWithMap = ({ token }) => {
                                 {dayNumber < numberOfDays ? 'Next Day' : 'Review Trip'}
                             </button>
                         </div>
+                        {/* Optimized Route Display */}
+                        {currentDayData.optimizedRoute.length > 0 && (
+                            <div className="mt-6">
+                                <h3 className="text-lg font-medium mb-2">Optimized Route:</h3>
+                                <p className="text-gray-700">{optimizedRouteText}</p>
+                                <p className="mt-2 text-blue-600">
+                                    Total Distance: {optimizedDistance} m
+                                </p>
+                            </div>
+                        )}
 
                         {/* Place Selection Section */}
                         {['HOTEL', 'RESTAURANT', 'ATTRACTION'].map((category) => (
@@ -360,16 +370,7 @@ const PlacesSelectionWithMap = ({ token }) => {
                             {currentDayData.isOptimizing ? 'Optimizing...' : 'Optimize Route'}
                         </button>
 
-                        {/* Optimized Route Display */}
-                        {currentDayData.optimizedRoute.length > 0 && (
-                            <div className="mt-6">
-                                <h3 className="text-lg font-medium mb-2">Optimized Route:</h3>
-                                <p className="text-gray-700">{optimizedRouteText}</p>
-                                <p className="mt-2">
-                                    Total Distance: {optimizedDistance} m | Estimated Time: {optimizedTime} mins
-                                </p>
-                            </div>
-                        )}
+
                     </div>
 
                     {/* Right Column: Map Display */}

@@ -215,6 +215,7 @@ public class TripController {
                 if (day.getOptimizedRoute() != null) {
                     List<String> optimizedRouteNames = objectMapper.readValue(day.getOptimizedRoute(), List.class);
                     dayMap.put("optimizedRoute", optimizedRouteNames);
+                    dayMap.put("totalDistance", day.getTotalDistance());
                 } else {
                     dayMap.put("optimizedRoute", null);
                 }

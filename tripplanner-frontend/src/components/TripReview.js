@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
-
+import {Link, useParams} from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 const TripReview = ({ token }) => {
     const { tripId } = useParams();
     const [trip, setTrip] = useState(null);
     const [error, setError] = useState(null);
-
+    const navigate = useNavigate();
     useEffect(() => {
         axios
             .get(`http://localhost:8081/api/trip/review/${tripId}`, {
@@ -32,7 +32,16 @@ const TripReview = ({ token }) => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
             <div className="bg-white p-8 rounded-md shadow-lg max-w-xl w-full">
-                <h2 className="text-2xl font-bold mb-4">Review Trip: {trip.tripName}</h2>
+                <p className="mb-4">
+                    <Link
+                        to="/dashboard"
+                        className="text-blue-500 hover:text-blue-600 font-medium transition duration-300"
+                    >
+                        Dashboard
+                    </Link>{' '}
+                    / Review Trip
+                </p>
+                <h2 className="text-2xl font-bold mb-4"> Trip Name: {trip.tripName}</h2>
 
                 {/* Trip Details */}
                 <div className="space-y-2 mb-6">
@@ -84,12 +93,22 @@ const TripReview = ({ token }) => {
                             ) : (
                                 <p className="text-gray-600">Route not optimized yet.</p>
                             )}
+                            <p className="mt-2">
+                                <strong className="font-semibold text-blue-600">Total Distance: {day.totalDistance} m</strong>
+                            </p>
                         </div>
                     ))
                 ) : (
                     <p className="text-gray-600">No trip day data available.</p>
                 )}
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    className="px-4 py-2 bg-green-500 text-white rounded"
+                >
+                    Return to Dashboard
+                </button>
             </div>
+
         </div>
     );
 };
