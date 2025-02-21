@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.web.client.HttpClientErrorException;
 import java.util.Locale;
 
 @Service
@@ -25,10 +25,15 @@ public class TomTomService {
     }
 
     /**
-     * Calls TomTom's calculateRoute endpoint to get the route distance (in meters) between two places.
+     * Calls TomTom's calculateRoute endpoint to get the route distance (in meters)
+     * between two places. If the API returns an error or the coordinates appear invalid,
+     * returns a high penalty distance.
      */
     public double getRouteDistance(Place origin, Place destination) {
         try {
+
+
+            // Build the URL using the origin and destination coordinates.
             String url = String.format(Locale.US,
                     "https://api.tomtom.com/routing/1/calculateRoute/%.6f,%.6f:%.6f,%.6f/json?key=%s",
                     origin.getLatitude(), origin.getLongitude(),
@@ -37,7 +42,6 @@ public class TomTomService {
 
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
             String jsonResponse = responseEntity.getBody();
-
             System.out.println("TomTom GET Response: " + jsonResponse);
 
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
@@ -47,12 +51,19 @@ public class TomTomService {
                 if (summaryNode.has("lengthInMeters")) {
                     return summaryNode.path("lengthInMeters").asDouble();
                 } else {
-                    throw new RuntimeException("TomTom response is missing the 'lengthInMeters' field in summary.");
+                    throw new RuntimeException("TomTom response is missing 'lengthInMeters' in summary.");
                 }
             }
             throw new RuntimeException("No route found in TomTom response.");
+        } catch (HttpClientErrorException e) {
+            // Log the error and return a penalty distance
+            String errorBody = e.getResponseBodyAsString();
+            System.err.println("Failed to get route distance from TomTom API: "
+                    + e.getStatusCode() + " " + errorBody);
+            return Double.MAX_VALUE;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get route distance from TomTom API: " + e.getMessage(), e);
+            System.err.println("Failed to get route distance from TomTom API: " + e.getMessage());
+            return Double.MAX_VALUE;
         }
     }
 
