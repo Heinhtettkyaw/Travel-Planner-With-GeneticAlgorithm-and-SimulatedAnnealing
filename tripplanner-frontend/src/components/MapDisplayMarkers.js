@@ -35,7 +35,7 @@ const MapDisplayMarkers = ({ cityCoordinates, markers }) => {
         }
     }, [markers]);
 
-    return <div ref={mapElement}  style={{width: '100%', height: '100%' }}></div>;
+    return <div ref={mapElement} style={{ width: '100%', height: '100%' }} ></div>;
 };
 
 export default MapDisplayMarkers;

@@ -205,12 +205,23 @@ const PlacesSelectionWithMap = ({ token }) => {
     };
 
     return (
-        <div className="flex h-[7   00px]">
+        <div className="flex h-[700px]">
             {/* Left Panel */}
             <div className="flex-1 p-2.5 overflow-y-auto">
                 <h2 className="text-lg font-bold">Day {dayNumber} of {numberOfDays}</h2>
                 {daysData.length > 0 && (
                     <div className="border border-gray-300 mb-2.5 p-2.5">
+                        {currentDayData.optimizedRoute.length > 0 && (
+                            <div>
+                                <h4 className="text-base font-semibold mt-2.5">Optimized Route (Text):</h4>
+                                <ul className="list-disc pl-5">
+                                    {currentDayData.optimizedRoute.map((placeObj, idx) => (
+                                        <li key={idx}>{placeObj.name}</li>
+                                    ))}
+                                </ul>
+                                <h4 className="text-base font-semibold mt-2.5">Total Distance: {optimizedDistance} m</h4>
+                            </div>
+                        )}
                         {['HOTEL', 'RESTAURANT', 'ATTRACTION'].map(category => (
                             <div key={category}>
                                 <h4 className="text-base font-semibold">{category}</h4>
@@ -253,17 +264,7 @@ const PlacesSelectionWithMap = ({ token }) => {
                         >
                             {currentDayData.isOptimizing ? 'Optimizing...' : 'Optimize Route'}
                         </button>
-                        {currentDayData.optimizedRoute.length > 0 && (
-                            <div>
-                                <h4 className="text-base font-semibold mt-2.5">Optimized Route (Text):</h4>
-                                <ul className="list-disc pl-5">
-                                    {currentDayData.optimizedRoute.map((placeObj, idx) => (
-                                        <li key={idx}>{placeObj.name}</li>
-                                    ))}
-                                </ul>
-                                <h4 className="text-base font-semibold mt-2.5">Total Distance: {optimizedDistance} m</h4>
-                            </div>
-                        )}
+
                     </div>
                 )}
                 <div className="mt-2.5 flex justify-between">

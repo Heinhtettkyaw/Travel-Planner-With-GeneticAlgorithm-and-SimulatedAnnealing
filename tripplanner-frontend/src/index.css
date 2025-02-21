@@ -33,5 +33,5 @@ code {
 }
 
 .animate-livePhoto {
-  animation: livePhoto 8s ease-in-out infinite;
+  animation: livePhoto 3s ease-in-out infinite;
 }
