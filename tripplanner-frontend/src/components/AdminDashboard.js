@@ -84,6 +84,66 @@ const AdminDashboard = () => {
                                 Manage Places
                             </Link>
                         </li>
+                        <li>
+                            <Link
+                                to="users"
+                                className="flex items-center text-gray-700 hover:text-gray-900 font-medium px-4 py-2 rounded-md transition duration-300 hover:bg-gray-100 group"
+                            >
+                                {/* Icon */}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 mr-3 text-gray-500 group-hover:text-gray-700 transition duration-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 14s3-3 3-5-1-4-3-4-3 1-3 4 3 5 3 5z"
+                                    />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M21 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"
+                                    />
+                                </svg>
+                                {/* Text */}
+                                Manage Users
+                            </Link>
+                        </li>
+                        {/*<li>*/}
+                        {/*    <Link*/}
+                        {/*        to="trips"*/}
+                        {/*        className="flex items-center text-gray-700 hover:text-gray-900 font-medium px-4 py-2 rounded-md transition duration-300 hover:bg-gray-100 group"*/}
+                        {/*    >*/}
+                        {/*        /!* Icon *!/*/}
+                        {/*        <svg*/}
+                        {/*            xmlns="http://www.w3.org/2000/svg"*/}
+                        {/*            className="h-6 w-6 mr-3 text-gray-500 group-hover:text-gray-700 transition duration-300"*/}
+                        {/*            fill="none"*/}
+                        {/*            viewBox="0 0 24 24"*/}
+                        {/*            stroke="currentColor"*/}
+                        {/*        >*/}
+                        {/*            <path*/}
+                        {/*                strokeLinecap="round"*/}
+                        {/*                strokeLinejoin="round"*/}
+                        {/*                strokeWidth={2}*/}
+                        {/*                d="M12 14l9-5-9-5-9 5 9 5z"*/}
+                        {/*            />*/}
+                        {/*            <path*/}
+                        {/*                strokeLinecap="round"*/}
+                        {/*                strokeLinejoin="round"*/}
+                        {/*                strokeWidth={2}*/}
+                        {/*                d="M12 14l9-5-9-5-9 5 9 5z"*/}
+                        {/*            />*/}
+                        {/*        </svg>*/}
+                        {/*        /!* Text *!/*/}
+                        {/*        View Trips*/}
+                        {/*    </Link>*/}
+                        {/*</li>*/}
                     </ul>
                 </aside>
 

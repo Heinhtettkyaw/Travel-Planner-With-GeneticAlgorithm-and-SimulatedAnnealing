@@ -3,9 +3,11 @@ package com.example.auth.controller;
 import com.example.auth.model.City;
 import com.example.auth.model.Place;
 import com.example.auth.model.Trip;
+import com.example.auth.model.User;
 import com.example.auth.repository.CityRepository;
 import com.example.auth.repository.PlaceRepository;
 import com.example.auth.repository.TripRepository;
+import com.example.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,8 @@ public class AdminController {
 
     @Autowired
     private PlaceRepository placeRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private TripRepository tripRepository;
@@ -108,7 +112,7 @@ public class AdminController {
         return ResponseEntity.ok(placeRepository.findAll());
     }
 
-    // --- Trips (view planned trips of all users) ---
+    //    // --- Trips (view planned trips of all users) ---
     @GetMapping("/trips")
     public ResponseEntity<List<Trip>> getAllTrips() {
         try {
@@ -129,4 +133,26 @@ public class AdminController {
             return ResponseEntity.badRequest().body("Error retrieving trip: " + ex.getMessage());
         }
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        try {
+            List<User> users = userRepository.findAll();
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            userRepository.deleteById(id);
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting user: " + e.getMessage());
+        }
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.example.auth.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class Trip {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+
     private User user;
 
     @ManyToOne

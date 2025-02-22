@@ -10,7 +10,8 @@ import PlacesSelectionWithMap from './components/PlacesSelectionWithMap';
 import AdminDashboard from './components/AdminDashboard';
 import ManageCities from './components/ManageCities';
 import ManagePlaces from './components/ManagePlaces';
-
+import ManageUsers from './components/ManageUsers';
+import ViewTrips from "./components/ViewTrips";
 import MainLayout from './components/MainLayout';
 import Profile from './components/Profile';
 import './index.css'; // Import your CSS file
@@ -39,7 +40,8 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />}>
             <Route path="cities" element={<ManageCities token={token} />} />
             <Route path="places" element={<ManagePlaces token={token} />} />
-
+            <Route path="users" element={<ManageUsers token={token} />} />
+            <Route path="trips" element={<ViewTrips token={token} />} />
           </Route>
         </Routes>
       </Router>
