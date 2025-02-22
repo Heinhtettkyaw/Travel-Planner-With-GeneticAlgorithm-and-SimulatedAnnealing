@@ -119,7 +119,7 @@ public class AdminController {
     @GetMapping("/trips")
     public ResponseEntity<List<Map<String, Object>>> getAllTrips() {
         try {
-            List<Trip> trips = tripRepository.findAll();
+            List<Trip> trips = tripRepository.findAllByOrderByCreatedAtDesc();
 
             List<Map<String, Object>> tripList = new ArrayList<>();
             for (Trip trip : trips) {
