@@ -1,17 +1,19 @@
 package com.example.auth.controller;
 
-import com.example.auth.model.City;
-import com.example.auth.model.Place;
-import com.example.auth.model.Trip;
-import com.example.auth.model.User;
+import com.example.auth.model.*;
 import com.example.auth.repository.CityRepository;
 import com.example.auth.repository.PlaceRepository;
 import com.example.auth.repository.TripRepository;
 import com.example.auth.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -27,6 +29,7 @@ public class AdminController {
 
     @Autowired
     private TripRepository tripRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // --- Cities CRUD ---
     @PostMapping("/cities")
@@ -114,12 +117,26 @@ public class AdminController {
 
     //    // --- Trips (view planned trips of all users) ---
     @GetMapping("/trips")
-    public ResponseEntity<List<Trip>> getAllTrips() {
+    public ResponseEntity<List<Map<String, Object>>> getAllTrips() {
         try {
             List<Trip> trips = tripRepository.findAll();
-            return ResponseEntity.ok(trips);
+
+            List<Map<String, Object>> tripList = new ArrayList<>();
+            for (Trip trip : trips) {
+                Map<String, Object> tripMap = new HashMap<>();
+                tripMap.put("id", trip.getId());
+                tripMap.put("tripName", trip.getTripName());
+                tripMap.put("startDate", trip.getStartDate());
+                tripMap.put("endDate", trip.getEndDate());
+                tripMap.put("cityName", trip.getCity().getName());
+                tripMap.put("username", trip.getUser().getUsername());
+                tripList.add(tripMap);
+            }
+
+            return ResponseEntity.ok(tripList);
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(null);
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body(null);
         }
     }
 
@@ -130,6 +147,7 @@ public class AdminController {
                     .orElseThrow(() -> new RuntimeException("Trip not found"));
             return ResponseEntity.ok(trip);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return ResponseEntity.badRequest().body("Error retrieving trip: " + ex.getMessage());
         }
     }
@@ -153,6 +171,74 @@ public class AdminController {
             return ResponseEntity.status(500).body("Error deleting user: " + e.getMessage());
         }
     }
+    @GetMapping("/review/trip/{tripId}")
+    public ResponseEntity<Map<String, Object>> reviewTrip(@PathVariable Long tripId) {
+        try {
+            // Validate tripId
+            if (tripId == null || tripId <= 0) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid tripId"));
+            }
 
+            // Retrieve the trip by ID.
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new RuntimeException("Trip not found"));
+
+            // Build the trip details response.
+            Map<String, Object> result = new HashMap<>();
+            result.put("id", trip.getId());
+            result.put("tripName", trip.getTripName());
+            result.put("startDate", trip.getStartDate());
+            result.put("endDate", trip.getEndDate());
+            result.put("cityName", trip.getCity().getName());
+            result.put("numberOfDays", trip.getNumberOfDays());
+            result.put("username", trip.getUser().getUsername());
+
+            // Collect details for each trip day.
+            List<Map<String, Object>> daysList = getTripDaysDetails(trip.getTripDays());
+            result.put("tripDays", daysList);
+
+            return ResponseEntity.ok(result);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to review trip", "message", ex.getMessage()));
+        }
+    }
+
+    /**
+     * Helper method to extract details for each trip day.
+     */
+    private List<Map<String, Object>> getTripDaysDetails(List<TripDay> tripDays) {
+        List<Map<String, Object>> daysList = new ArrayList<>();
+        for (TripDay tripDay : tripDays) {
+            Map<String, Object> dayMap = new HashMap<>();
+            dayMap.put("dayNumber", tripDay.getDayNumber());
+
+            if (tripDay.getStartingPlace() != null) {
+                dayMap.put("startingPlace", tripDay.getStartingPlace().getName());
+            } else {
+                dayMap.put("startingPlace", null);
+            }
+
+            if (tripDay.getOptimizedRoute() != null && !tripDay.getOptimizedRoute().isEmpty()) {
+                try {
+                    List<String> optimizedRouteNames = objectMapper.readValue(tripDay.getOptimizedRoute(), List.class);
+                    dayMap.put("optimizedRoute", optimizedRouteNames);
+                    dayMap.put("totalDistance", tripDay.getTotalDistance());
+                    dayMap.put("totalTime", tripDay.getTotalTime());
+                } catch (Exception e) {
+                    dayMap.put("optimizedRoute", null);
+                    dayMap.put("totalDistance", 0.0);
+                    dayMap.put("totalTime", 0.0);
+                }
+            } else {
+                dayMap.put("optimizedRoute", null);
+                dayMap.put("totalDistance", 0.0);
+                dayMap.put("totalTime", 0.0);
+            }
+
+            daysList.add(dayMap);
+        }
+        return daysList;
+    }
 
 }
