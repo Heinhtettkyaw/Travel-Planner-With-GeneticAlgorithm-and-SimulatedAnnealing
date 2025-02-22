@@ -257,6 +257,8 @@ const PlacesSelectionWithMap = ({ token }) => {
     };
 
     return (
+        // <div className="min-h-screen max-w-full bg-gray-100 flex items-center justify-center">
+        //     <div className="bg-white flex p-8 rounded-md shadow-lg w-full max-w-6xl">
         <div className="min-h-screen max-w-full bg-gray-100 flex items-center justify-center">
             <div className="bg-white p-8 rounded-md shadow-lg w-full max-w-6xl">
                 {/* Header */}
@@ -298,10 +300,10 @@ const PlacesSelectionWithMap = ({ token }) => {
                         </div>
                         {/* Optimized Route Display */}
                         {currentDayData.optimizedRoute.length > 0 && (
-                            <div className="mt-6">
-                                <h3 className="text-lg font-medium mb-2">Optimized Route:</h3>
-                                <p className="text-gray-700">{optimizedRouteText}</p>
-                                <p className="mt-2 text-blue-600">
+                            <div className="mt-6 mb-6">
+                                <h3 className="text-lg font-bold mb-2 text-blue-600">Optimized Route:</h3>
+                                <p className="text-blue-700 font-medium">{optimizedRouteText}</p>
+                                <p className="mt-2 text-blue-600 font-medium">
                                     Total Distance: {optimizedDistance} m
                                 </p>
                             </div>
@@ -309,7 +311,7 @@ const PlacesSelectionWithMap = ({ token }) => {
 
                         {/* Place Selection Section */}
                         {['HOTEL', 'RESTAURANT', 'ATTRACTION'].map((category) => (
-                            <div key={category} className="mb-6">
+                            <div key={category} className="mb-6 mt-6">
                                 <h3 className="text-lg font-medium mb-2">{category}</h3>
                                 <ul className="space-y-2">
                                     {currentDayData.placesByCategory[category]?.map((place) => {

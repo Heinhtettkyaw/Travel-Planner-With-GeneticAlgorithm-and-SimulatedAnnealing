@@ -238,7 +238,7 @@ public class TripController {
     public ResponseEntity<?> getMyTrips(Authentication auth) {
         try {
             User currentUser = ((CustomUserDetails) auth.getPrincipal()).getUser();
-            List<Trip> trips = tripRepository.findByUser(currentUser);
+            List<Trip> trips = tripRepository.findByUserOrderByCreatedAtDesc(currentUser);
             List<Map<String, Object>> tripList = new ArrayList<>();
             for (Trip trip : trips) {
                 Map<String, Object> map = new HashMap<>();
@@ -247,6 +247,7 @@ public class TripController {
                 map.put("startDate", trip.getStartDate());
                 map.put("endDate", trip.getEndDate());
                 map.put("cityName", trip.getCity().getName());
+                map.put("createdAt", trip.getCreatedAt());
                 tripList.add(map);
             }
             return ResponseEntity.ok(tripList);

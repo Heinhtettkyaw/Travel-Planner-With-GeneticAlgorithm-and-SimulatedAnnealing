@@ -13,6 +13,7 @@ const ManagePlaces = ({ token }) => {
         longitude: '',
     });
     const [editing, setEditing] = useState(false);
+    const [showForm, setShowForm] = useState(false); // State to control form visibility
 
     useEffect(() => {
         fetchPlaces();
@@ -59,6 +60,7 @@ const ManagePlaces = ({ token }) => {
                         longitude: '',
                     });
                     setEditing(false);
+                    setShowForm(false); // Hide the form after updating
                 })
                 .catch((err) => console.error(err));
         } else {
@@ -76,6 +78,7 @@ const ManagePlaces = ({ token }) => {
                         latitude: '',
                         longitude: '',
                     });
+                    setShowForm(false); // Hide the form after adding
                 })
                 .catch((err) => console.error(err));
         }
@@ -91,15 +94,20 @@ const ManagePlaces = ({ token }) => {
             latitude: place.latitude,
             longitude: place.longitude,
         });
+        setShowForm(true); // Show the form when editing
     };
 
     const handleDelete = (id) => {
-        axios
-            .delete(`http://localhost:8081/admin/places/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            .then(fetchPlaces)
-            .catch((err) => console.error(err));
+        // Confirmation dialog
+        const isConfirmed = window.confirm('Are you sure you want to delete this place?');
+        if (isConfirmed) {
+            axios
+                .delete(`http://localhost:8081/admin/places/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                .then(fetchPlaces)
+                .catch((err) => console.error(err));
+        }
     };
 
     return (
@@ -107,82 +115,95 @@ const ManagePlaces = ({ token }) => {
             <div className="bg-white p-8 rounded-md shadow-lg w-full max-w-4xl">
                 <h3 className="text-2xl font-bold mb-6">Manage Places</h3>
 
+                {/* Add Place Button */}
+                {!showForm && (
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-md shadow-sm transition duration-300 mb-6"
+                    >
+                        Add Place
+                    </button>
+                )}
+
                 {/* Place Form */}
-                <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Place Name:</label>
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Enter place name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Category:</label>
-                        <select
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        >
-                            <option value="HOTEL">HOTEL</option>
-                            <option value="RESTAURANT">RESTAURANT</option>
-                            <option value="ATTRACTION">ATTRACTION</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">City:</label>
-                        <select
-                            name="cityId"
-                            value={formData.cityId}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        >
-                            <option value="">Select City</option>
-                            {cities.map((city) => (
-                                <option key={city.id} value={city.id}>
-                                    {city.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Latitude:</label>
-                        <input
-                            type="number"
-                            name="latitude"
-                            placeholder="Enter latitude"
-                            value={formData.latitude}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Longitude:</label>
-                        <input
-                            type="number"
-                            name="longitude"
-                            placeholder="Enter longitude"
-                            value={formData.longitude}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            className="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-md shadow-sm transition duration-300"
-                        >
-                            {editing ? 'Update Place' : 'Add Place'}
-                        </button>
-                        {editing && (
+                {showForm && (
+                    <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Place Name:</label>
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Enter place name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Category:</label>
+                            <select
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                <option value="ATTRACTION">Attraction</option>
+                                <option value="HOTEL">Hotel</option>
+                                <option value="RESTAURANT">Restaurant</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">City:</label>
+                            <select
+                                name="cityId"
+                                value={formData.cityId}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                <option value="">Select City</option>
+                                {cities.map((city) => (
+                                    <option key={city.id} value={city.id}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Latitude:</label>
+                            <input
+                                type="number"
+                                step="any"
+                                name="latitude"
+                                placeholder="Enter latitude"
+                                value={formData.latitude}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Longitude:</label>
+                            <input
+                                type="number"
+                                step="any"
+                                name="longitude"
+                                placeholder="Enter longitude"
+                                value={formData.longitude}
+                                onChange={handleChange}
+                                required
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                type="submit"
+                                className="w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-md shadow-sm transition duration-300"
+                            >
+                                {editing ? 'Update Place' : 'Add Place'}
+                            </button>
                             <button
                                 type="button"
                                 onClick={() => {
@@ -195,14 +216,15 @@ const ManagePlaces = ({ token }) => {
                                         latitude: '',
                                         longitude: '',
                                     });
+                                    setShowForm(false); // Hide the form on cancel
                                 }}
                                 className="w-full md:w-auto bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-4 py-2 rounded-md shadow-sm transition duration-300"
                             >
                                 Cancel
                             </button>
-                        )}
-                    </div>
-                </form>
+                        </div>
+                    </form>
+                )}
 
                 {/* Place List */}
                 <ul className="space-y-2">

@@ -15,7 +15,14 @@ const Dashboard = ({ token, setToken }) => {
                 headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {
-                setTrips(response.data);
+                // const sortedTrips = response.data.sort((a, b) => {
+                //     return new Date(b.startDate) - new Date(a.startDate);
+                // });
+                // setTrips(sortedTrips);
+                const sortedTrips = response.data.sort((a, b) => {
+                    return new Date(b.createdAt) - new Date(a.createdAt); // Sorting by createdAt in descending order
+                });
+                setTrips(sortedTrips);
             })
             .catch((err) => {
                 console.error('Error fetching trips:', err);
