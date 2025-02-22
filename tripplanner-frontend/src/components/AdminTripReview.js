@@ -72,7 +72,7 @@ const AdminTripReview = ({ token }) => {
                             {day.optimizedRoute?.join(', ') || 'N/A'}
                         </p>
                         <p className="text-gray-600">
-                            Total Distance: {day.totalDistance} km
+                            Total Distance: {day.totalDistance} m
                         </p>
                     </div>
                 ))}
