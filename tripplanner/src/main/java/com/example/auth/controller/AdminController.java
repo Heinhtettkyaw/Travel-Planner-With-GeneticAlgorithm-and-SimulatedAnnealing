@@ -1,12 +1,20 @@
 package com.example.auth.controller;
 
-import com.example.auth.model.*;
+import com.example.auth.model.City;
+import com.example.auth.model.Place;
+import com.example.auth.model.Trip;
+import com.example.auth.model.TripDay;
+import com.example.auth.model.User;
 import com.example.auth.repository.CityRepository;
 import com.example.auth.repository.PlaceRepository;
 import com.example.auth.repository.TripRepository;
 import com.example.auth.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +32,13 @@ public class AdminController {
 
     @Autowired
     private PlaceRepository placeRepository;
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private TripRepository tripRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // --- Cities CRUD ---
@@ -115,14 +125,15 @@ public class AdminController {
         return ResponseEntity.ok(placeRepository.findAll());
     }
 
-    //    // --- Trips (view planned trips of all users) ---
+    // --- Trips (view planned trips of all users) with Pagination ---
     @GetMapping("/trips")
-    public ResponseEntity<List<Map<String, Object>>> getAllTrips() {
+    public ResponseEntity<?> getAllTrips(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "25") int size) {
         try {
-            List<Trip> trips = tripRepository.findAllByOrderByCreatedAtDesc();
-
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<Trip> tripPage = tripRepository.findAllByOrderByCreatedAtDesc(pageable);
             List<Map<String, Object>> tripList = new ArrayList<>();
-            for (Trip trip : trips) {
+            for (Trip trip : tripPage.getContent()) {
                 Map<String, Object> tripMap = new HashMap<>();
                 tripMap.put("id", trip.getId());
                 tripMap.put("tripName", trip.getTripName());
@@ -132,8 +143,12 @@ public class AdminController {
                 tripMap.put("username", trip.getUser().getUsername());
                 tripList.add(tripMap);
             }
-
-            return ResponseEntity.ok(tripList);
+            Map<String, Object> response = new HashMap<>();
+            response.put("trips", tripList);
+            response.put("currentPage", tripPage.getNumber());
+            response.put("totalPages", tripPage.getTotalPages());
+            response.put("totalItems", tripPage.getTotalElements());
+            return ResponseEntity.ok(response);
         } catch (Exception ex) {
             ex.printStackTrace();
             return ResponseEntity.status(500).body(null);
@@ -171,6 +186,7 @@ public class AdminController {
             return ResponseEntity.status(500).body("Error deleting user: " + e.getMessage());
         }
     }
+
     @GetMapping("/review/trip/{tripId}")
     public ResponseEntity<Map<String, Object>> reviewTrip(@PathVariable Long tripId) {
         try {
@@ -241,4 +257,33 @@ public class AdminController {
         return daysList;
     }
 
+    // --- New Server-Side Search Endpoint with Pagination ---
+    @GetMapping("/trips/search")
+    public ResponseEntity<?> searchTrips(@RequestParam("query") String query,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "25") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<Trip> tripPage = tripRepository.findByUser_UsernameContainingIgnoreCaseOrCity_NameContainingIgnoreCase(query, query, pageable);
+            List<Map<String, Object>> tripList = new ArrayList<>();
+            for (Trip trip : tripPage.getContent()) {
+                Map<String, Object> tripMap = new HashMap<>();
+                tripMap.put("id", trip.getId());
+                tripMap.put("tripName", trip.getTripName());
+                tripMap.put("startDate", trip.getStartDate());
+                tripMap.put("endDate", trip.getEndDate());
+                tripMap.put("cityName", trip.getCity().getName());
+                tripMap.put("username", trip.getUser().getUsername());
+                tripList.add(tripMap);
+            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("trips", tripList);
+            response.put("currentPage", tripPage.getNumber());
+            response.put("totalPages", tripPage.getTotalPages());
+            response.put("totalItems", tripPage.getTotalElements());
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 }
