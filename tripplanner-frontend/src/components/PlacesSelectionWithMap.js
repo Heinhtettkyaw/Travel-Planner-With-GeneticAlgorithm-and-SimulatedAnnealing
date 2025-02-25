@@ -64,6 +64,8 @@ const PlacesSelectionWithMap = ({ token }) => {
                 selectedPlaces: [],
                 startingPlaceId: null,
                 optimizedRoute: [],
+                optimizedDistance: null,
+                optimizedTime: null,
                 isOptimizing: false,
                 placesByCategory: { HOTEL: [], RESTAURANT: [], ATTRACTION: [] },
             }));
@@ -99,10 +101,21 @@ const PlacesSelectionWithMap = ({ token }) => {
         );
     }, [availablePlaces]);
 
-    // Reset optimized map on day change
+    // When dayNumber or daysData changes, update optimized route data accordingly.
     useEffect(() => {
-        setShowOptimizedMap(false);
-    }, [dayNumber]);
+        const currentDay = daysData.find((day) => day.dayNumber === dayNumber);
+        if (currentDay && currentDay.optimizedRoute.length > 0) {
+            setOptimizedRoute(currentDay.optimizedRoute);
+            setOptimizedDistance(currentDay.optimizedDistance);
+            setOptimizedTime(currentDay.optimizedTime);
+            setShowOptimizedMap(true);
+        } else {
+            setOptimizedRoute([]);
+            setOptimizedDistance(null);
+            setOptimizedTime(null);
+            setShowOptimizedMap(false);
+        }
+    }, [dayNumber, daysData]);
 
     // Get the current day's data or a default object if not yet available
     const currentDayData =
@@ -110,6 +123,8 @@ const PlacesSelectionWithMap = ({ token }) => {
             selectedPlaces: [],
             placesByCategory: { HOTEL: [], RESTAURANT: [], ATTRACTION: [] },
             optimizedRoute: [],
+            optimizedDistance: null,
+            optimizedTime: null,
             isOptimizing: false,
             startingPlaceId: null,
         };
@@ -220,14 +235,20 @@ const PlacesSelectionWithMap = ({ token }) => {
                 setDaysData((prevDays) =>
                     prevDays.map((d) =>
                         d.dayNumber === dayNumber
-                            ? { ...d, optimizedRoute: mappedOptimizedRoute, isOptimizing: false }
+                            ? {
+                                ...d,
+                                optimizedRoute: mappedOptimizedRoute,
+                                isOptimizing: false,
+                                optimizedDistance: response.data.totalDistance,
+                                optimizedTime: response.data.totalTime,
+                            }
                             : d
                     )
                 );
                 setOptimizedRoute(mappedOptimizedRoute);
-                setShowOptimizedMap(true);
                 setOptimizedDistance(response.data.totalDistance);
                 setOptimizedTime(response.data.totalTime);
+                setShowOptimizedMap(true);
 
                 alert(`Day ${dayNumber}: Optimized route created and saved successfully.`);
             })
@@ -257,8 +278,6 @@ const PlacesSelectionWithMap = ({ token }) => {
     };
 
     return (
-        // <div className="min-h-screen max-w-full bg-gray-100 flex items-center justify-center">
-        //     <div className="bg-white flex p-8 rounded-md shadow-lg w-full max-w-6xl">
         <div className="min-h-screen max-w-full bg-gray-100 flex items-center justify-center">
             <div className="bg-white p-8 rounded-md shadow-lg w-full max-w-6xl">
                 {/* Header */}
@@ -315,7 +334,6 @@ const PlacesSelectionWithMap = ({ token }) => {
                                 <h3 className="text-lg font-medium mb-2">{category}</h3>
                                 <ul className="space-y-2">
                                     {currentDayData.placesByCategory[category]?.map((place) => {
-                                        // Check if this place was already visited in any previous day
                                         const visitedDay = getVisitedDay(place.id);
                                         return (
                                             <li key={place.id} className="flex flex-col">
@@ -333,8 +351,8 @@ const PlacesSelectionWithMap = ({ token }) => {
                                                 </div>
                                                 {visitedDay && (
                                                     <span className="text-xs text-red-500 ml-7">
-                            (This place was already visited in day {visitedDay})
-                          </span>
+                                                        (This place was already visited in day {visitedDay})
+                                                    </span>
                                                 )}
                                             </li>
                                         );
@@ -371,8 +389,6 @@ const PlacesSelectionWithMap = ({ token }) => {
                         >
                             {currentDayData.isOptimizing ? 'Optimizing...' : 'Optimize Route'}
                         </button>
-
-
                     </div>
 
                     {/* Right Column: Map Display */}
