@@ -22,7 +22,6 @@ public class Place {
 
     @ManyToOne
     @JoinColumn(name = "city_id")
-
     private City city;
 
     private double latitude;

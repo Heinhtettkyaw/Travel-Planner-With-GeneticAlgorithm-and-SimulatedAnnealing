@@ -8,12 +8,12 @@ const ManagePlaces = ({ token }) => {
         id: null,
         name: '',
         category: 'ATTRACTION',
-        cityId: '',
+        city: { id: '' },
         latitude: '',
         longitude: '',
     });
     const [editing, setEditing] = useState(false);
-    const [showForm, setShowForm] = useState(false); // State to control form visibility
+    const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         fetchPlaces();
@@ -39,7 +39,11 @@ const ManagePlaces = ({ token }) => {
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (e.target.name === 'cityId') {
+            setFormData({ ...formData, city: { id: e.target.value } });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        }
     };
 
     const handleSubmit = (e) => {
@@ -55,12 +59,12 @@ const ManagePlaces = ({ token }) => {
                         id: null,
                         name: '',
                         category: 'ATTRACTION',
-                        cityId: '',
+                        city: { id: '' },
                         latitude: '',
                         longitude: '',
                     });
                     setEditing(false);
-                    setShowForm(false); // Hide the form after updating
+                    setShowForm(false);
                 })
                 .catch((err) => console.error(err));
         } else {
@@ -74,11 +78,11 @@ const ManagePlaces = ({ token }) => {
                         id: null,
                         name: '',
                         category: 'ATTRACTION',
-                        cityId: '',
+                        city: { id: '' },
                         latitude: '',
                         longitude: '',
                     });
-                    setShowForm(false); // Hide the form after adding
+                    setShowForm(false);
                 })
                 .catch((err) => console.error(err));
         }
@@ -90,17 +94,15 @@ const ManagePlaces = ({ token }) => {
             id: place.id,
             name: place.name,
             category: place.category,
-            cityId: place.city ? place.city.id : '',
+            city: { id: place.city ? place.city.id : '' },
             latitude: place.latitude,
             longitude: place.longitude,
         });
-        setShowForm(true); // Show the form when editing
+        setShowForm(true);
     };
 
     const handleDelete = (id) => {
-        // Confirmation dialog
-        const isConfirmed = window.confirm('Are you sure you want to delete this place?');
-        if (isConfirmed) {
+        if (window.confirm('Are you sure you want to delete this place?')) {
             axios
                 .delete(`http://localhost:8081/admin/places/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -129,7 +131,9 @@ const ManagePlaces = ({ token }) => {
                 {showForm && (
                     <form onSubmit={handleSubmit} className="mb-6 space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Place Name:</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Place Name:
+                            </label>
                             <input
                                 type="text"
                                 name="name"
@@ -141,7 +145,9 @@ const ManagePlaces = ({ token }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Category:</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Category:
+                            </label>
                             <select
                                 name="category"
                                 value={formData.category}
@@ -155,10 +161,12 @@ const ManagePlaces = ({ token }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">City:</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                City:
+                            </label>
                             <select
                                 name="cityId"
-                                value={formData.cityId}
+                                value={formData.city.id}
                                 onChange={handleChange}
                                 required
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -172,7 +180,9 @@ const ManagePlaces = ({ token }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Latitude:</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Latitude:
+                            </label>
                             <input
                                 type="number"
                                 step="any"
@@ -185,7 +195,9 @@ const ManagePlaces = ({ token }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Longitude:</label>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Longitude:
+                            </label>
                             <input
                                 type="number"
                                 step="any"
@@ -212,11 +224,11 @@ const ManagePlaces = ({ token }) => {
                                         id: null,
                                         name: '',
                                         category: 'ATTRACTION',
-                                        cityId: '',
+                                        city: { id: '' },
                                         latitude: '',
                                         longitude: '',
                                     });
-                                    setShowForm(false); // Hide the form on cancel
+                                    setShowForm(false);
                                 }}
                                 className="w-full md:w-auto bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-4 py-2 rounded-md shadow-sm transition duration-300"
                             >
@@ -233,10 +245,11 @@ const ManagePlaces = ({ token }) => {
                             key={place.id}
                             className="flex justify-between items-center bg-gray-50 p-4 rounded-md shadow-sm"
                         >
-                            <span className="text-gray-700">
-                                {place.name} - {place.category} in{' '}
-                                {place.city ? place.city.name : 'Unknown'} ({place.latitude}, {place.longitude})
-                            </span>
+              <span className="text-gray-700">
+                {place.name} - {place.category} in{' '}
+                  {place.city ? place.city.name : 'Unknown'} (
+                  {place.latitude}, {place.longitude})
+              </span>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => handleEdit(place)}
