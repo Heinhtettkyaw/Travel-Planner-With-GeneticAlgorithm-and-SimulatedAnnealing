@@ -1,6 +1,6 @@
 // src/pages/LandingPage.js
 import { useState, useEffect } from 'react';
-import { BsPeople,BsCalendarEvent } from 'react-icons/bs';
+import { BsPeople,BsCalendarEvent,BsStarFill,BsX} from 'react-icons/bs';
 import { BsSun, BsMoon } from 'react-icons/bs';
 
 const LandingPage = () => {
@@ -21,6 +21,32 @@ const LandingPage = () => {
     const toggleTheme = () => {
         setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
+    const [showModal, setShowModal] = useState(false);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const trips = [
+        {
+            id: 1,
+            name: "Santorini Coastal Escape",
+            description: "7-day romantic getaway with private yacht tours and sunset dinners",
+            itinerary: ["Oia Village", "Red Beach", "Akrotiri Lighthouse", "Thira Ancient Site"],
+            image: "/photos/bagan-section-photo.jpg"
+        },
+        {
+            id: 2,
+            name: "Santorini Coastal Escape",
+            description: "7-day romantic getaway with private yacht tours and sunset dinners",
+            itinerary: ["Oia Village", "Red Beach", "Akrotiri Lighthouse", "Thira Ancient Site"],
+            image: "/photos/bagan-section-photo.jpg"
+        },
+        {
+            id: 3,
+            name: "Santorini Coastal Escape",
+            description: "7-day romantic getaway with private yacht tours and sunset dinners",
+            itinerary: ["Oia Village", "Red Beach", "Akrotiri Lighthouse", "Thira Ancient Site"],
+            image: "/photos/bagan-section-photo.jpg"
+        },
+        // Add more trips here
+    ];
 
     return (
         <div
@@ -124,6 +150,93 @@ const LandingPage = () => {
                     </div>
                 </section>
 
+
+                <section id="recommendations" className="mt-24 pb-12">
+                    <h2 className="text-3xl font-bold text-center text-[var(--text-color)] mb-16">
+                        Popular Trip Recommendations
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {trips.map(trip => (
+                            <div
+                                key={trip.id}
+                                className="bg-[var(--secondary-bg)] rounded-2xl shadow-lg overflow-hidden group transition-transform hover:translate-y-[-4px]"
+                            >
+                                <div className="relative">
+                                    <img
+                                        src={trip.image}
+                                        alt={trip.name}
+                                        className="w-full h-48 object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black opacity-30"></div>
+                                    <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-4">
+                                        <h3 className="text-2xl mb-2">{trip.name}</h3>
+                                        <p className="text-lg">Romantic island getaway</p>
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <div className="flex items-center mb-2">
+                                        <BsStarFill className="text-[var(--accent-color)] mr-1" />
+                                        <span className="text-[var(--accent-color)]">4.9</span>
+                                    </div>
+                                    <p className="text-[var(--text-color)] mb-4">
+                                        7-day itinerary with iconic landmarks and hidden gems
+                                    </p>
+                                    <button
+                                        className="w-full bg-[var(--accent-color)] text-white py-3 rounded-lg transition hover:bg-[var(--accent-color)]/90"
+                                        onClick={() => {
+                                            setSelectedTrip(trip);
+                                            setShowModal(true);
+                                        }}
+                                    >
+                                        Explore This Trip
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Modal */}
+                {showModal && (
+                    <div
+                        className="fixed inset-0 bg-[var(--primary-bg)]/50 backdrop-blur-sm flex justify-center items-center"
+                        onClick={() => setShowModal(false)}
+                    >
+                        <div
+                            className="relative max-w-xl w-full bg-[var(--secondary-bg)] rounded-2xl p-6 shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                className="absolute top-4 right-4 text-[var(--text-color)] hover:text-[var(--accent-color)]"
+                                onClick={() => setShowModal(false)}
+                            >
+                                <BsX size={24} />
+                            </button>
+                            <div className="space-y-6">
+                                <h3 className="text-2xl font-bold text-[var(--text-color)]">{selectedTrip?.name}</h3>
+                                <div className="flex items-center mb-2">
+                                    <BsStarFill className="text-[var(--accent-color)] mr-1" />
+                                    <span className="text-[var(--accent-color)]">4.9</span>
+                                </div>
+                                <p className="text-[var(--text-color)]">{selectedTrip?.description}</p>
+                                <div>
+                                    <h4 className="text-lg font-medium text-[var(--text-color)] mb-2">Itinerary:</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        {selectedTrip?.itinerary?.map((item, index) => (
+                                            <li key={index} className="text-[var(--text-color)]">{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <button
+                                    className="w-full bg-[var(--accent-color)] text-white py-3 rounded-lg transition hover:bg-[var(--accent-color)]/90"
+                                >
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Testimonials Section */}
                 <section id="testimonials" className="mt-20 pb-12">
                     <div className="max-w-md mx-auto md:max-w-lg">
@@ -149,7 +262,7 @@ const LandingPage = () => {
 
             <footer className="bg-[var(--primary-bg)] py-8 mt-12">
                 <div className="max-w-7xl mx-auto text-center text-[var(--text-color)]">
-                    <p>© 2023 GeoQuery. All rights reserved.</p>
+                    <p>© 2025 GeoQuery. All rights reserved.</p>
                     <div className="flex justify-center space-x-4 mt-6">
                         <a href="#" className="text-[var(--text-color)-500] hover:text-[var(--accent-color)] transition">
                             Privacy Policy
