@@ -26,24 +26,29 @@ const LandingPage = () => {
     const trips = [
         {
             id: 1,
-            name: "Santorini Coastal Escape",
-            description: "7-day romantic getaway with private yacht tours and sunset dinners",
-            itinerary: ["Oia Village", "Red Beach", "Akrotiri Lighthouse", "Thira Ancient Site"],
+            name: "48 Hours in Bagan",
+            description: "In first day, start the tour at 08:30 am from the hotel and meet the Bagan tour guide. At 09:00 am, begin to explore the archaeological sites and the ancient city of Bagan," +
+                " which recently got recognized as a World Heritage Site by UNESCO. " +
+                "Visit Bagan's most sacred pagodas and temples, including Archaeological Museum and King Palace. In the afternoon, visit Minnanthu village, an agricultural village in the middle of the archaeological zone." +
+                " In the evening, embark on a pleasant boat ride on the Irrawaddy River. Enjoy the sunset and beautiful scenery. Drop off at the hotel at 06:00 pm." +
+                 " In second day, at 8:30 am, you will be picked up by the experienced Bagan tour guide from your hotel and drive 48 km from Bagan." +
+                " On the way, stop to see the palm juice and oil factories and peanut oil factories. After arrival, climb up 777 steps to Mount Popa, home to Myanmar's Nats (Spirits) Kingdom." +
+                " After enjoying some spectacular views from the top and taking a snapshot for memories, head back to the hotel. Drop off at the hotel at 05:30 pm and stay overnight at the hotel in Bagan.",
             image: "/photos/bagan-section-photo.jpg"
         },
         {
             id: 2,
-            name: "Santorini Coastal Escape",
-            description: "7-day romantic getaway with private yacht tours and sunset dinners",
-            itinerary: ["Oia Village", "Red Beach", "Akrotiri Lighthouse", "Thira Ancient Site"],
-            image: "/photos/bagan-section-photo.jpg"
+            name: "TOP 7 BEST PLACES TO VISIT",
+            description: "Must visit places in Bagan to explore!",
+            itinerary: ["Ananda Pahto", "Shwesandaw Paya", "Thatbyinnyu Pahto", "Sulamani Pahto", "Dhammayangyi Pahto", " Shwezigon Paya", " Bagan Archaeological Museum"],
+            image: "/photos/bagan.jpeg"
         },
         {
             id: 3,
-            name: "Santorini Coastal Escape",
-            description: "7-day romantic getaway with private yacht tours and sunset dinners",
-            itinerary: ["Oia Village", "Red Beach", "Akrotiri Lighthouse", "Thira Ancient Site"],
-            image: "/photos/bagan-section-photo.jpg"
+            name: "What to do in Bagan?",
+            description: "Bagan's ancient wonders are best discovered by renting a bicycle and exploring its numerous pagodas and temples. A quintessential experience is watching the sunset from Shwesandaw Pagoda, followed by waking up early to witness a breathtaking sunrise. For an unforgettable perspective, consider a hot air balloon ride at dawn. Lastly, a half-day excursion to Mount Popa provides a captivating glimpse into the region's spiritual heart." ,
+            itinerary: ["Shwesandaw Pagoda", "Mount Popa", "Bulethi Pagoda", "Shwegugyi Pagoda"],
+            image: "/photos/hot air ballon.jpeg"
         },
         // Add more trips here
     ];
@@ -153,7 +158,7 @@ const LandingPage = () => {
 
                 <section id="recommendations" className="mt-24 pb-12">
                     <h2 className="text-3xl font-bold text-center text-[var(--text-color)] mb-16">
-                        Popular Trip Recommendations
+                        Trip Recommendations
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {trips.map(trip => (
@@ -170,16 +175,13 @@ const LandingPage = () => {
                                     <div className="absolute inset-0 bg-black opacity-30"></div>
                                     <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-4">
                                         <h3 className="text-2xl mb-2">{trip.name}</h3>
-                                        <p className="text-lg">Romantic island getaway</p>
+                                        <p className="text-lg">Adventure is calling. Will you go?</p>
                                     </div>
                                 </div>
                                 <div className="p-6">
-                                    <div className="flex items-center mb-2">
-                                        <BsStarFill className="text-[var(--accent-color)] mr-1" />
-                                        <span className="text-[var(--accent-color)]">4.9</span>
-                                    </div>
+
                                     <p className="text-[var(--text-color)] mb-4">
-                                        7-day itinerary with iconic landmarks and hidden gems
+                                        Itineraries with iconic landmarks and hidden gems
                                     </p>
                                     <button
                                         className="w-full bg-[var(--accent-color)] text-white py-3 rounded-lg transition hover:bg-[var(--accent-color)]/90"
@@ -220,18 +222,13 @@ const LandingPage = () => {
                                 </div>
                                 <p className="text-[var(--text-color)]">{selectedTrip?.description}</p>
                                 <div>
-                                    <h4 className="text-lg font-medium text-[var(--text-color)] mb-2">Itinerary:</h4>
                                     <ul className="list-disc list-inside space-y-1">
                                         {selectedTrip?.itinerary?.map((item, index) => (
                                             <li key={index} className="text-[var(--text-color)]">{item}</li>
                                         ))}
                                     </ul>
                                 </div>
-                                <button
-                                    className="w-full bg-[var(--accent-color)] text-white py-3 rounded-lg transition hover:bg-[var(--accent-color)]/90"
-                                >
-                                    Book Now
-                                </button>
+
                             </div>
                         </div>
                     </div>
