@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Profile = () => {
-    const [tab, setTab] = useState('edit'); // Default tab: Edit Profile
-    const [userData, setUserData] = useState(null); // Holds the fetched user data
-    const [editData, setEditData] = useState({}); // Holds the form data for editing
+    const [tab, setTab] = useState('edit');
+    const [userData, setUserData] = useState(null);
+    const [editData, setEditData] = useState({});
     const [passwordData, setPasswordData] = useState({
         oldPassword: '',
         newPassword: '',
@@ -20,9 +20,9 @@ const Profile = () => {
             const response = await axios.get('http://localhost:8081/auth/profile', {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-            const data = response.data; // Fetched user data
-            setUserData(data); // Store the fetched data in state
-            setEditData(data); // Pre-fill the edit form with the fetched data
+            const data = response.data;
+            setUserData(data);
+            setEditData(data);
         } catch (error) {
             console.error(error);
         }
@@ -35,7 +35,7 @@ const Profile = () => {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             alert('Profile updated successfully');
-            fetchUserProfile(); // Refresh the data after update
+            fetchUserProfile();
         } catch (error) {
             console.error(error.response ? error.response.data : error.message);
         }
@@ -43,6 +43,20 @@ const Profile = () => {
 
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate new password: at least 6 characters, 1 capital letter, and 1 number
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+        if (!passwordRegex.test(passwordData.newPassword)) {
+            alert("Password must be at least 6 characters long, contain at least one capital letter and one number.");
+            return;
+        }
+
+        // Ensure new password and confirm password match
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            alert("New password and confirm password do not match.");
+            return;
+        }
+
         try {
             await axios.post('http://localhost:8081/auth/profile/change-password', passwordData, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -55,7 +69,6 @@ const Profile = () => {
 
     return (
         <div className="flex h-screen">
-            {/* Left Sidebar Menu */}
             <div className="w-64 bg-gray-200 flex flex-col justify-between py-4 border-r border-gray-300">
                 <div className="space-y-2 px-4">
                     <h3 className="text-lg font-bold mb-4">Profile</h3>
@@ -81,7 +94,6 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* Right Content Area */}
             <div className="flex-1 p-6 overflow-y-auto">
                 {tab === 'edit' && (
                     <form onSubmit={handleEditSubmit} className="space-y-4">

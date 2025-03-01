@@ -27,13 +27,14 @@ const LandingPage = () => {
         {
             id: 1,
             name: "48 Hours in Bagan",
-            description: "In first day, start the tour at 08:30 am from the hotel and meet the Bagan tour guide. At 09:00 am, begin to explore the archaeological sites and the ancient city of Bagan," +
-                " which recently got recognized as a World Heritage Site by UNESCO. " +
-                "Visit Bagan's most sacred pagodas and temples, including Archaeological Museum and King Palace. In the afternoon, visit Minnanthu village, an agricultural village in the middle of the archaeological zone." +
-                " In the evening, embark on a pleasant boat ride on the Irrawaddy River. Enjoy the sunset and beautiful scenery. Drop off at the hotel at 06:00 pm." +
-                 " In second day, at 8:30 am, you will be picked up by the experienced Bagan tour guide from your hotel and drive 48 km from Bagan." +
-                " On the way, stop to see the palm juice and oil factories and peanut oil factories. After arrival, climb up 777 steps to Mount Popa, home to Myanmar's Nats (Spirits) Kingdom." +
-                " After enjoying some spectacular views from the top and taking a snapshot for memories, head back to the hotel. Drop off at the hotel at 05:30 pm and stay overnight at the hotel in Bagan.",
+            description: "Discover the best of Bagan in just two days!",
+            itinerary: ["In first day, start the tour at 08:30 am from the hotel and meet the Bagan tour guide. At 09:00 am, begin to explore the archaeological sites and the ancient city of Bagan which recently got recognized as a World Heritage Site by UNESCO.",
+                "Visit Bagan's most sacred pagodas and temples, including Archaeological Museum and King Palace. In the afternoon, visit Minnanthu village, an agricultural village in the middle of the archaeological zone.",
+                " In the evening, embark on a pleasant boat ride on the Irrawaddy River. Enjoy the sunset and beautiful scenery. Drop off at the hotel at 06:00 pm.",
+                "In second day, at 8:30 am, you will be picked up by the experienced Bagan tour guide from your hotel and drive 48 km from Bagan.",
+                "On the way, stop to see the palm juice and oil factories and peanut oil factories. After arrival, climb up 777 steps to Mount Popa, home to Myanmar's Nats (Spirits) Kingdom.",
+                " After enjoying some spectacular views from the top and taking a snapshot for memories, head back to the hotel. Drop off at the hotel at 05:30 pm and stay overnight at the hotel in Bagan."],
+
             image: "/photos/bagan-section-photo.jpg"
         },
         {
@@ -236,6 +237,10 @@ const LandingPage = () => {
 
                 {/* Testimonials Section */}
                 <section id="testimonials" className="mt-20 pb-12">
+                    <h2 className="text-3xl font-bold text-center text-[var(--text-color)] mb-16">
+                        Testimonials
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div className="max-w-md mx-auto md:max-w-lg">
                         <div className="bg-[var(--secondary-bg)] rounded-2xl p-8 shadow-lg">
                             <div className="flex items-center mb-6">
@@ -245,7 +250,7 @@ const LandingPage = () => {
                                 {/*    className="w-12 h-12 rounded-full mr-4"*/}
                                 {/*/>*/}
                                 <div>
-                                    <h4 className="text-lg font-medium text-[var(--text-color)]">Emily T.</h4>
+                                    <h4 className="text-lg font-medium text-[var(--text-color)]">Thiri Shwe Sin</h4>
                                     <p className="text-sm text-[var(--text-color)]">Frequent Traveler</p>
                                 </div>
                             </div>
@@ -254,6 +259,39 @@ const LandingPage = () => {
                             </p>
                         </div>
                     </div>
+                        {/*end of testimonial*/}
+                        <div className="max-w-md mx-auto md:max-w-lg mt-3">
+                            <div className="bg-[var(--secondary-bg)] rounded-2xl p-8 shadow-lg">
+                                <div className="flex items-center mb-6">
+
+                                    <div>
+                                        <h4 className="text-lg font-medium text-[var(--text-color)]">Hsu Thar</h4>
+                                        <p className="text-sm text-[var(--text-color)]">Frequent Traveler</p>
+                                    </div>
+                                </div>
+                                <p className="text-[var(--text-color)] italic">
+                                    "Finally a planner that understands my love for hidden gems!"
+                                </p>
+                            </div>
+
+                        </div>
+                        <div className="max-w-md mx-auto md:max-w-lg mt-3">
+                            <div className="bg-[var(--secondary-bg)] rounded-2xl p-8 shadow-lg">
+                                <div className="flex items-center mb-6">
+
+                                    <div>
+                                        <h4 className="text-lg font-medium text-[var(--text-color)]">Lin Leck</h4>
+                                        <p className="text-sm text-[var(--text-color)]">Frequent Traveler</p>
+                                    </div>
+                                </div>
+                                <p className="text-[var(--text-color)] italic">
+                                    "Finally a planner that understands my love for hidden gems!"
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </section>
             </main>
 
