@@ -16,47 +16,30 @@ const LoginSignup = ({ setToken }) => {
 
     // Password validation regex
     const validatePassword = (password) => {
-        const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
+        const regex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
         return regex.test(password);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Validation checks
-        if (!isLogin) {
-            if (password !== confirmPassword) {
-                setErrorMessage('Passwords do not match');
-                return;
-            }
-            if (!validatePassword(password)) {
-                setErrorMessage(
-                    'Password must be at least 6 characters with 1 uppercase letter and 1 number'
-                );
-                return;
-            }
+        if (!isLogin && password !== confirmPassword) {
+            setErrorMessage('Passwords do not match');
+            return;
+        }
+        if (!isLogin && !validatePassword(password)) {
+            setErrorMessage(
+                'Password must be at least 6 characters long, contain 1 capital letter, and 1 number'
+            );
+            return;
         }
 
-        // API endpoints
-        const url = isLogin
-            ? 'http://localhost:8081/auth/login'
-            : 'http://localhost:8081/auth/register';
-
-        // Request data
-        const data = isLogin
+        const url = isLogin ? 'http://localhost:8081/auth/login' : 'http://localhost:8081/auth/register';
+        const requestData = isLogin
             ? { username, password }
-            : {
-                username,
-                password,
-                confirmPassword,
-                email,
-                phone,
-                fullName,
-                gender
-            };
+            : { username, password, confirmPassword, email, phone, fullName, gender };
 
-        // API call
-        axios.post(url, data)
+        axios
+            .post(url, requestData)
             .then((response) => {
                 if (isLogin) {
                     const { token, role } = response.data;
@@ -66,17 +49,23 @@ const LoginSignup = ({ setToken }) => {
                     setToken(token);
 
                     // Redirect based on role
-                    navigate(role === 'ADMIN' ? '/admin' : '/dashboard');
+                    if (role === 'ADMIN') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/dashboard');
+                    }
                 } else {
-                    alert('Registration successful!');
+                    alert('Registration successful. Please login.');
                     setIsLogin(true);
                 }
             })
             .catch((error) => {
-                setErrorMessage(
-                    error.response?.data?.message ||
-                    'Network error or invalid credentials'
-                );
+                if (error.response) {
+                    setErrorMessage(error.response.data.message || 'Authentication error');
+                } else {
+                    setErrorMessage('Network error or server unreachable');
+                }
+                alert('Authentication error');
             });
     };
 
